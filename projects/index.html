@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Projects Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --surface: #ffffff;
+        --surface-soft: #f8fbff;
+        --header: #eef3f9;
+        --line: #dfe8f2;
+        --line-strong: #cad7e6;
+        --text: #24324a;
+        --muted: #6f819c;
+        --purple: #7c2cff;
+        --purple-dark: #5f1ed8;
+        --purple-soft: #f0e8ff;
+        --green: #058b54;
+        --green-soft: #e6faef;
+        --blue: #0878bd;
+        --blue-soft: #e7f4ff;
+        --yellow: #9c6500;
+        --yellow-soft: #fff4d6;
+        --red: #e0194d;
+        --shadow: 0 18px 54px rgba(30, 42, 62, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        letter-spacing: 0;
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      a:focus-visible {
+        outline: 3px solid #cbb7ff;
+        outline-offset: 2px;
+      }
+
+      .projects-app {
+        display: grid;
+        grid-template-columns: 72px minmax(0, 1fr);
+        min-height: 100vh;
+      }
+
+      .side-rail {
+        align-items: center;
+        background: #ffffff;
+        border-right: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 24px 14px;
+      }
+
+      .brand {
+        align-items: center;
+        background: var(--purple);
+        border-radius: 999px;
+        box-shadow: 0 12px 22px rgba(124, 44, 255, 0.24);
+        color: #fff;
+        display: inline-flex;
+        font-weight: 850;
+        height: 42px;
+        justify-content: center;
+        text-decoration: none;
+        width: 42px;
+      }
+
+      .rail-nav,
+      .rail-footer {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .rail-footer {
+        margin-top: auto;
+      }
+
+      .rail-button {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        color: #55677f;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 850;
+        height: 36px;
+        justify-content: center;
+        text-decoration: none;
+        width: 36px;
+      }
+
+      .rail-button.active {
+        background: var(--purple-soft);
+        color: var(--purple);
+      }
+
+      .rail-button:hover {
+        background: var(--surface-soft);
+      }
+
+      .main-shell {
+        min-width: 0;
+      }
+
+      .topbar {
+        align-items: center;
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        padding: 24px 28px 20px;
+      }
+
+      .breadcrumb {
+        align-items: center;
+        color: #8190a7;
+        display: flex;
+        flex-wrap: wrap;
+        font-size: 13px;
+        font-weight: 750;
+        gap: 10px;
+        margin-bottom: 28px;
+      }
+
+      .breadcrumb a {
+        color: #53657d;
+        text-decoration: none;
+      }
+
+      .breadcrumb strong {
+        color: #939daf;
+        font-weight: 800;
+      }
+
+      h1 {
+        color: #1f2b43;
+        font-size: 30px;
+        line-height: 1.1;
+        margin: 0;
+      }
+
+      .top-actions,
+      .toolbar-actions {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .ghost-button,
+      .icon-button {
+        align-items: center;
+        border-radius: 7px;
+        display: inline-flex;
+        font-weight: 800;
+        gap: 8px;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .primary-button {
+        background: var(--purple);
+        border: 0;
+        box-shadow: 0 10px 18px rgba(124, 44, 255, 0.2);
+        color: #fff;
+      }
+
+      .primary-button:hover {
+        background: var(--purple-dark);
+      }
+
+      .secondary-button,
+      .ghost-button,
+      .icon-button {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        color: #30415c;
+      }
+
+      .secondary-button:hover,
+      .ghost-button:hover,
+      .icon-button:hover {
+        background: var(--surface-soft);
+      }
+
+      .icon-button {
+        padding: 0;
+        width: 42px;
+      }
+
+      .summary-band,
+      .tabs-band,
+      .filters-band,
+      .toolbar-band {
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        padding: 16px 28px;
+      }
+
+      .summary-card {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        gap: 0;
+        min-height: 62px;
+        max-width: 1320px;
+      }
+
+      .summary-item {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        min-width: 220px;
+        padding: 0 18px;
+      }
+
+      .summary-item + .summary-item {
+        border-left: 1px solid var(--line);
+      }
+
+      .summary-label {
+        color: #51627a;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .summary-value {
+        color: #24324a;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .tabs {
+        border-bottom: 1px solid var(--line-strong);
+        display: flex;
+        gap: 24px;
+        max-width: 1320px;
+      }
+
+      .tab {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        color: #53657d;
+        display: inline-flex;
+        font-weight: 850;
+        gap: 8px;
+        margin-bottom: -1px;
+        min-height: 42px;
+        padding: 0 0 12px;
+        white-space: nowrap;
+      }
+
+      .tab.active {
+        border-bottom: 3px solid var(--purple);
+        color: var(--purple);
+      }
+
+      .filters {
+        align-items: center;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 8px;
+        max-width: 1320px;
+        overflow-x: auto;
+      }
+
+      .filter-chip,
+      .chip {
+        align-items: center;
+        background: #eef3f8;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        color: #53647b;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 850;
+        gap: 6px;
+        line-height: 1;
+        min-height: 28px;
+        max-width: 180px;
+        overflow: hidden;
+        padding: 0 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .filter-chip {
+        background: var(--surface);
+        border-color: var(--line);
+        color: #30415c;
+        min-height: 34px;
+        padding: 0 13px;
+      }
+
+      .filter-chip.active {
+        background: var(--purple-soft);
+        border-color: #d4c0ff;
+        color: var(--purple);
+      }
+
+      .chip.green {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .chip.blue {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .chip.yellow {
+        background: var(--yellow-soft);
+        color: var(--yellow);
+      }
+
+      .chip.gray {
+        background: #eef2f7;
+        color: #617088;
+      }
+
+      .toolbar-band {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+      }
+
+      .toolbar-status {
+        color: #61718a;
+        font-size: 13px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .toolbar-actions {
+        justify-content: flex-end;
+        min-width: 0;
+      }
+
+      .field {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line-strong);
+        border-radius: 7px;
+        display: flex;
+        gap: 8px;
+        height: 40px;
+        padding: 0 12px;
+      }
+
+      .field input {
+        border: 0;
+        color: var(--text);
+        height: 36px;
+        min-width: 170px;
+        outline: 0;
+      }
+
+      .field input::placeholder {
+        color: #8fa0b7;
+      }
+
+      .workspace-area {
+        padding: 22px 28px 30px;
+      }
+
+      .table-shell {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 10px 26px rgba(34, 49, 76, 0.06);
+        max-width: 1320px;
+        overflow: auto;
+      }
+
+      table {
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 1040px;
+        table-layout: fixed;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        height: 58px;
+        padding: 12px 14px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        background: var(--header);
+        color: #394a63;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      tr:last-child td {
+        border-bottom: 0;
+      }
+
+      th:last-child,
+      td:last-child {
+        border-right: 0;
+      }
+
+      .name-cell {
+        min-width: 0;
+      }
+
+      .workspace-name {
+        color: #1f2b43;
+        display: block;
+        font-weight: 850;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .workspace-sub {
+        color: #71839d;
+        display: block;
+        font-size: 12px;
+        margin-top: 3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .chip-row {
+        align-items: center;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .empty-row td {
+        color: #73849c;
+        font-weight: 700;
+        height: 74px;
+      }
+
+      .text-button {
+        background: transparent;
+        border: 0;
+        color: #40516c;
+        font-weight: 800;
+        padding: 0;
+      }
+
+      .text-button:hover {
+        color: var(--purple);
+      }
+
+      .modal-overlay {
+        align-items: center;
+        background: rgba(16, 24, 45, 0.34);
+        bottom: 0;
+        display: flex;
+        justify-content: center;
+        left: 0;
+        padding: 24px;
+        position: fixed;
+        right: 0;
+        top: 0;
+        z-index: 100;
+      }
+
+      .modal-overlay[hidden] {
+        display: none;
+      }
+
+      .modal {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        max-height: min(760px, calc(100vh - 48px));
+        overflow: hidden;
+        width: min(620px, 100%);
+      }
+
+      .modal-head,
+      .modal-footer {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        padding: 18px 22px;
+      }
+
+      .modal-head {
+        border-bottom: 1px solid var(--line);
+      }
+
+      .modal-head h2 {
+        font-size: 16px;
+        margin: 0;
+      }
+
+      .modal-close {
+        background: transparent;
+        border: 0;
+        color: #6b7d95;
+        font-size: 18px;
+        height: 34px;
+        padding: 0;
+        width: 34px;
+      }
+
+      .modal-body {
+        max-height: calc(100vh - 192px);
+        overflow: auto;
+        padding: 22px;
+      }
+
+      .modal-footer {
+        border-top: 1px solid var(--line);
+        gap: 10px;
+      }
+
+      .footer-left,
+      .footer-right {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+      }
+
+      .section-label {
+        color: #53657d;
+        font-size: 12px;
+        font-weight: 900;
+        letter-spacing: 0.04em;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+      }
+
+      .choice-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .choice-card {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        color: #263650;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        min-height: 126px;
+        padding: 18px;
+      }
+
+      .choice-card:hover,
+      .choice-card.selected {
+        background: #fbf8ff;
+        border-color: #cdb8ff;
+      }
+
+      .choice-icon {
+        align-items: center;
+        background: var(--purple-soft);
+        border-radius: 8px;
+        color: var(--purple);
+        display: inline-flex;
+        font-size: 20px;
+        font-weight: 900;
+        height: 38px;
+        justify-content: center;
+        width: 38px;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .form-row {
+        display: grid;
+        gap: 7px;
+      }
+
+      .form-row label {
+        color: #40516c;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .form-row input,
+      .form-row select {
+        background: #fff;
+        border: 1px solid var(--line-strong);
+        border-radius: 7px;
+        color: var(--text);
+        min-height: 40px;
+        padding: 0 11px;
+      }
+
+      .field-error {
+        color: var(--red);
+        font-size: 12px;
+        font-weight: 800;
+        min-height: 16px;
+      }
+
+      .existing-list {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .existing-row {
+        align-items: center;
+        background: #fff;
+        border-bottom: 1px solid var(--line);
+        display: grid;
+        gap: 12px;
+        grid-template-columns: 24px minmax(0, 1fr) 120px;
+        min-height: 68px;
+        padding: 12px 14px;
+      }
+
+      .existing-row:last-child {
+        border-bottom: 0;
+      }
+
+      .existing-row:hover {
+        background: var(--surface-soft);
+      }
+
+      .existing-row input {
+        height: 17px;
+        width: 17px;
+      }
+
+      button[disabled] {
+        cursor: not-allowed;
+        opacity: 0.48;
+      }
+
+      .toast {
+        background: #15213a;
+        border-radius: 8px;
+        bottom: 24px;
+        box-shadow: var(--shadow);
+        color: #fff;
+        font-weight: 800;
+        left: 50%;
+        min-width: 260px;
+        opacity: 0;
+        padding: 13px 16px;
+        pointer-events: none;
+        position: fixed;
+        text-align: center;
+        transform: translate(-50%, 16px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 120;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      .sr-only {
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      @media (max-width: 900px) {
+        .projects-app {
+          grid-template-columns: 1fr;
+        }
+
+        .side-rail {
+          align-items: center;
+          border-bottom: 1px solid var(--line);
+          border-right: 0;
+          flex-direction: row;
+          overflow-x: auto;
+          padding: 12px 16px;
+        }
+
+        .rail-nav,
+        .rail-footer {
+          flex-direction: row;
+          width: auto;
+        }
+
+        .rail-footer {
+          margin-left: auto;
+          margin-top: 0;
+        }
+
+        .topbar,
+        .toolbar-band {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .top-actions,
+        .toolbar-actions {
+          justify-content: flex-start;
+        }
+
+        .toolbar-actions {
+          flex-wrap: wrap;
+        }
+
+        .summary-card {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .summary-item {
+          min-height: 50px;
+        }
+
+        .summary-item + .summary-item {
+          border-left: 0;
+          border-top: 1px solid var(--line);
+        }
+
+        .field {
+          width: 100%;
+        }
+
+        .field input {
+          min-width: 0;
+          width: 100%;
+        }
+
+        .choice-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="projects-app">
+      <aside class="side-rail" aria-label="Global navigation">
+        <a class="brand" href="../index.html" id="railProducerLink" aria-label="Producer prototype">P</a>
+        <nav class="rail-nav" aria-label="Primary">
+          <a class="rail-button" href="../index.html" id="homeProducerLink" title="Producer" aria-label="Producer">PR</a>
+          <span class="rail-button active" title="Projects" aria-label="Projects" aria-current="page">PJ</span>
+          <button class="rail-button" type="button" title="Workspaces" aria-label="Workspaces">W</button>
+          <button class="rail-button" type="button" title="Channels" aria-label="Channels">C</button>
+        </nav>
+        <div class="rail-footer">
+          <button class="rail-button" type="button" title="Help" aria-label="Help">?</button>
+          <button class="rail-button" type="button" title="Profile" aria-label="Profile">PG</button>
+        </div>
+      </aside>
+
+      <div class="main-shell">
+        <header class="topbar">
+          <div>
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+              <a href="../index.html" id="breadcrumbProducerLink">Home</a>
+              <span aria-hidden="true">&gt;</span>
+              <span>Projects</span>
+              <span aria-hidden="true">&gt;</span>
+              <strong aria-current="page">Sidd Test</strong>
+            </nav>
+            <h1>My workspace</h1>
+          </div>
+          <div class="top-actions">
+            <a class="secondary-button" href="../index.html" id="topProducerLink">Producer</a>
+            <button class="icon-button" type="button" title="Settings" aria-label="Project settings">S</button>
+          </div>
+        </header>
+
+        <section class="summary-band" aria-label="Project summary">
+          <div class="summary-card">
+            <div class="summary-item">
+              <span class="summary-label">Due date</span>
+              <span class="summary-value">No due date</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Channels</span>
+              <span class="summary-value" id="channelSummary">No channels</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">Workspaces</span>
+              <span class="summary-value" id="workspaceSummary">0 linked</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="tabs-band" aria-label="Project sections">
+          <div class="tabs" role="tablist" aria-label="Project tabs">
+            <button class="tab" type="button" role="tab" aria-selected="false" data-tab="creative">Creative</button>
+            <button class="tab active" type="button" role="tab" aria-selected="true" data-tab="workspaces">Workspaces</button>
+          </div>
+        </section>
+
+        <section class="filters-band" aria-label="Channel filters">
+          <div class="filters" id="channelFilters">
+            <button class="filter-chip active" type="button" data-channel="All">All</button>
+            <button class="filter-chip" type="button" data-channel="Meta">Meta</button>
+            <button class="filter-chip" type="button" data-channel="X">X</button>
+            <button class="filter-chip" type="button" data-channel="Pinterest">Pinterest</button>
+            <button class="filter-chip" type="button" data-channel="Google Ads">Google Ads</button>
+            <button class="filter-chip" type="button" data-channel="Snapchat">Snapchat</button>
+            <button class="filter-chip" type="button" data-channel="TikTok">TikTok</button>
+            <button class="filter-chip" type="button" data-channel="Amazon DSP">Amazon DSP</button>
+            <button class="filter-chip" type="button" data-channel="Reddit">Reddit</button>
+            <button class="filter-chip" type="button" data-channel="Spotify">Spotify</button>
+            <button class="filter-chip" type="button" data-channel="LinkedIn">LinkedIn</button>
+          </div>
+        </section>
+
+        <section class="toolbar-band" aria-label="Workspace tools">
+          <div class="toolbar-status" id="tableStatus">0 workspaces</div>
+          <div class="toolbar-actions">
+            <label class="field" aria-label="Filter by tags">
+              <span aria-hidden="true">Tag</span>
+              <input id="tagFilter" type="search" placeholder="Filter by tags" />
+            </label>
+            <label class="field" aria-label="Search by name">
+              <span aria-hidden="true">Search</span>
+              <input id="nameSearch" type="search" placeholder="Search Workspaces name" />
+            </label>
+            <button class="primary-button" id="addWorkspaceButton" type="button" aria-haspopup="dialog" aria-expanded="false">
+              Add workspaces
+            </button>
+          </div>
+        </section>
+
+        <main class="workspace-area">
+          <div class="table-shell">
+            <table id="projectTable" aria-label="Project workspaces table">
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="workspaceModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="workspaceModalTitle">
+        <header class="modal-head">
+          <h2 id="workspaceModalTitle">Add Workspaces to Project</h2>
+          <button class="modal-close" id="closeWorkspaceModal" type="button" aria-label="Close">x</button>
+        </header>
+
+        <div class="modal-body">
+          <div id="optionStep">
+            <div class="section-label">Choose an option</div>
+            <div class="choice-grid">
+              <button class="choice-card" type="button" data-option="create">
+                <span class="choice-icon" aria-hidden="true">+</span>
+                <strong>Create New Workspace</strong>
+              </button>
+              <button class="choice-card" type="button" data-option="existing">
+                <span class="choice-icon" aria-hidden="true">+</span>
+                <strong>Add Existing Workspace</strong>
+              </button>
+            </div>
+          </div>
+
+          <div id="createStep" hidden>
+            <div class="section-label">Create workspace</div>
+            <div class="form-grid">
+              <div class="form-row">
+                <label for="workspaceName">Workspace name</label>
+                <input id="workspaceName" type="text" placeholder="e.g. Q3 paid social workspace" />
+              </div>
+              <div class="form-row">
+                <label for="workspaceChannel">Channel</label>
+                <select id="workspaceChannel">
+                  <option>Meta</option>
+                  <option>X</option>
+                  <option>Pinterest</option>
+                  <option>Google Ads</option>
+                  <option>CM360</option>
+                  <option>Snapchat</option>
+                  <option>TikTok</option>
+                  <option>Amazon DSP</option>
+                  <option>Reddit</option>
+                  <option>Spotify</option>
+                  <option>LinkedIn</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="workspaceTags">Tags</label>
+                <input id="workspaceTags" type="text" placeholder="Launch, Paid social" />
+              </div>
+              <div class="field-error" id="createError" role="alert"></div>
+            </div>
+          </div>
+
+          <div id="existingStep" hidden>
+            <div class="section-label">Existing workspaces</div>
+            <div class="existing-list" id="existingList"></div>
+          </div>
+        </div>
+
+        <footer class="modal-footer">
+          <div class="footer-left">
+            <button class="ghost-button" id="backStepButton" type="button" hidden>Back</button>
+          </div>
+          <div class="footer-right">
+            <button class="ghost-button" id="cancelWorkspaceModal" type="button">Cancel</button>
+            <button class="primary-button" id="nextStepButton" type="button" disabled>Next</button>
+            <button class="primary-button" id="createWorkspaceButton" type="button" hidden>Create Workspace</button>
+            <button class="primary-button" id="addSelectedButton" type="button" hidden disabled>Add selected</button>
+          </div>
+        </footer>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+      const existingWorkspaces = [
+        {
+          id: "retail-launch-q3",
+          name: "Retail launch Q3",
+          channel: "Meta",
+          tags: ["Launch", "Paid social"],
+          blueprints: 4,
+          updatedAt: "Today, 10:45",
+          publishedAt: "Not published",
+          status: "Draft",
+          statusStyle: "gray",
+        },
+        {
+          id: "evergreen-search-us",
+          name: "Evergreen search US",
+          channel: "Google Ads",
+          tags: ["Evergreen", "Search"],
+          blueprints: 7,
+          updatedAt: "Yesterday, 16:20",
+          publishedAt: "Jun 12, 2026",
+          status: "Live",
+          statusStyle: "green",
+        },
+        {
+          id: "holiday-video-testing",
+          name: "Holiday video testing",
+          channel: "TikTok",
+          tags: ["Testing", "Video"],
+          blueprints: 3,
+          updatedAt: "Jun 11, 2026",
+          publishedAt: "Scheduled",
+          status: "Scheduled",
+          statusStyle: "blue",
+        },
+        {
+          id: "prospecting-audience-build",
+          name: "Prospecting audience build",
+          channel: "LinkedIn",
+          tags: ["B2B", "Prospecting"],
+          blueprints: 2,
+          updatedAt: "Jun 10, 2026",
+          publishedAt: "Not published",
+          status: "Ready",
+          statusStyle: "yellow",
+        },
+      ];
+
+      const creativeColumns = `
+        <tr>
+          <th style="width: 32%">Creative</th>
+          <th style="width: 16%">Format</th>
+          <th style="width: 22%">Source workspace</th>
+          <th style="width: 14%">Status</th>
+          <th style="width: 16%">Updated at</th>
+        </tr>
+      `;
+
+      const workspaceColumns = `
+        <tr>
+          <th style="width: 25%">Workspace</th>
+          <th style="width: 18%">Tags</th>
+          <th style="width: 14%">Blueprints</th>
+          <th style="width: 16%">Updated at</th>
+          <th style="width: 16%">Published at</th>
+          <th style="width: 11%">Actions</th>
+        </tr>
+      `;
+
+      const state = {
+        activeTab: "workspaces",
+        activeChannel: "All",
+        selectedOption: "",
+        selectedExisting: new Set(),
+        toastTimer: 0,
+        workspaces: [],
+      };
+
+      const tableHead = document.getElementById("tableHead");
+      const tableBody = document.getElementById("tableBody");
+      const tableStatus = document.getElementById("tableStatus");
+      const channelSummary = document.getElementById("channelSummary");
+      const workspaceSummary = document.getElementById("workspaceSummary");
+      const tagFilter = document.getElementById("tagFilter");
+      const nameSearch = document.getElementById("nameSearch");
+      const modal = document.getElementById("workspaceModal");
+      const addWorkspaceButton = document.getElementById("addWorkspaceButton");
+      const closeWorkspaceModal = document.getElementById("closeWorkspaceModal");
+      const cancelWorkspaceModal = document.getElementById("cancelWorkspaceModal");
+      const optionStep = document.getElementById("optionStep");
+      const createStep = document.getElementById("createStep");
+      const existingStep = document.getElementById("existingStep");
+      const nextStepButton = document.getElementById("nextStepButton");
+      const backStepButton = document.getElementById("backStepButton");
+      const createWorkspaceButton = document.getElementById("createWorkspaceButton");
+      const addSelectedButton = document.getElementById("addSelectedButton");
+      const existingList = document.getElementById("existingList");
+      const workspaceName = document.getElementById("workspaceName");
+      const workspaceChannel = document.getElementById("workspaceChannel");
+      const workspaceTags = document.getElementById("workspaceTags");
+      const createError = document.getElementById("createError");
+      const toast = document.getElementById("toast");
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function chip(label, style = "gray") {
+        return `<span class="chip ${style}">${escapeHtml(label)}</span>`;
+      }
+
+      function filteredWorkspaces() {
+        const tagQuery = tagFilter.value.trim().toLowerCase();
+        const nameQuery = nameSearch.value.trim().toLowerCase();
+
+        return state.workspaces.filter((workspace) => {
+          const channelMatches = state.activeChannel === "All" || workspace.channel === state.activeChannel;
+          const nameMatches = !nameQuery || workspace.name.toLowerCase().includes(nameQuery);
+          const tagMatches = !tagQuery || workspace.tags.some((tag) => tag.toLowerCase().includes(tagQuery));
+          return channelMatches && nameMatches && tagMatches;
+        });
+      }
+
+      function renderSummary() {
+        workspaceSummary.textContent = `${state.workspaces.length} linked`;
+        const channels = Array.from(new Set(state.workspaces.map((workspace) => workspace.channel)));
+        channelSummary.textContent = channels.length ? channels.join(", ") : "No channels";
+      }
+
+      function renderTable() {
+        renderSummary();
+
+        if (state.activeTab === "creative") {
+          tableHead.innerHTML = creativeColumns;
+          tableStatus.textContent = "0 creatives";
+          tableBody.innerHTML = `<tr class="empty-row"><td colspan="5">No creatives to show</td></tr>`;
+          return;
+        }
+
+        const rows = filteredWorkspaces();
+        tableHead.innerHTML = workspaceColumns;
+        tableStatus.textContent = `${rows.length} workspace${rows.length === 1 ? "" : "s"}`;
+
+        if (!rows.length) {
+          tableBody.innerHTML = `<tr class="empty-row"><td colspan="6">${state.workspaces.length ? "No workspaces match current filters" : "No data to show"}</td></tr>`;
+          return;
+        }
+
+        tableBody.innerHTML = rows
+          .map(
+            (workspace) => `
+              <tr>
+                <td class="name-cell">
+                  <span class="workspace-name">${escapeHtml(workspace.name)}</span>
+                  <span class="workspace-sub">${escapeHtml(workspace.channel)}</span>
+                </td>
+                <td>
+                  <div class="chip-row">${workspace.tags.map((tag) => chip(tag)).join("")}</div>
+                </td>
+                <td>${workspace.blueprints}</td>
+                <td>${escapeHtml(workspace.updatedAt)}</td>
+                <td>${workspace.publishedAt === "Not published" ? `<span class="workspace-sub">${escapeHtml(workspace.publishedAt)}</span>` : chip(workspace.publishedAt, workspace.publishedAt === "Scheduled" ? "blue" : "green")}</td>
+                <td><button class="text-button" type="button" data-open-workspace="${escapeHtml(workspace.id)}">Open</button></td>
+              </tr>
+            `
+          )
+          .join("");
+      }
+
+      function renderExistingList() {
+        const linkedIds = new Set(state.workspaces.map((workspace) => workspace.id));
+        const available = existingWorkspaces.filter((workspace) => !linkedIds.has(workspace.id));
+
+        if (!available.length) {
+          existingList.innerHTML = `<div class="existing-row"><span></span><div><span class="workspace-name">No available workspaces</span><span class="workspace-sub">All saved workspaces are linked to this project</span></div><span></span></div>`;
+          addSelectedButton.disabled = true;
+          return;
+        }
+
+        existingList.innerHTML = available
+          .map(
+            (workspace) => `
+              <label class="existing-row">
+                <input type="checkbox" value="${escapeHtml(workspace.id)}" ${state.selectedExisting.has(workspace.id) ? "checked" : ""} />
+                <div>
+                  <span class="workspace-name">${escapeHtml(workspace.name)}</span>
+                  <span class="workspace-sub">${escapeHtml(workspace.tags.join(", "))}</span>
+                </div>
+                <span>${chip(workspace.channel, "gray")}</span>
+              </label>
+            `
+          )
+          .join("");
+        addSelectedButton.disabled = state.selectedExisting.size === 0;
+      }
+
+      function showToast(message) {
+        window.clearTimeout(state.toastTimer);
+        toast.textContent = message;
+        toast.classList.add("show");
+        state.toastTimer = window.setTimeout(() => toast.classList.remove("show"), 2400);
+      }
+
+      function setModalStep(step) {
+        optionStep.hidden = step !== "option";
+        createStep.hidden = step !== "create";
+        existingStep.hidden = step !== "existing";
+        backStepButton.hidden = step === "option";
+        nextStepButton.hidden = step !== "option";
+        createWorkspaceButton.hidden = step !== "create";
+        addSelectedButton.hidden = step !== "existing";
+
+        if (step === "option") {
+          nextStepButton.disabled = !state.selectedOption;
+        }
+
+        if (step === "existing") {
+          renderExistingList();
+        }
+      }
+
+      function resetModal() {
+        state.selectedOption = "";
+        state.selectedExisting.clear();
+        workspaceName.value = "";
+        workspaceChannel.value = "Meta";
+        workspaceTags.value = "";
+        createError.textContent = "";
+        document.querySelectorAll(".choice-card").forEach((card) => card.classList.remove("selected"));
+        setModalStep("option");
+      }
+
+      function openModal() {
+        resetModal();
+        modal.hidden = false;
+        addWorkspaceButton.setAttribute("aria-expanded", "true");
+        window.setTimeout(() => modal.querySelector(".choice-card").focus(), 0);
+      }
+
+      function closeModal() {
+        modal.hidden = true;
+        addWorkspaceButton.setAttribute("aria-expanded", "false");
+        addWorkspaceButton.focus();
+      }
+
+      function createWorkspace() {
+        const name = workspaceName.value.trim();
+        if (!name) {
+          createError.textContent = "Workspace name is required.";
+          workspaceName.focus();
+          return;
+        }
+
+        const tags = workspaceTags.value
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter(Boolean);
+
+        state.workspaces.push({
+          id: `workspace-${Date.now()}`,
+          name,
+          channel: workspaceChannel.value,
+          tags: tags.length ? tags : ["Unassigned"],
+          blueprints: 0,
+          updatedAt: "Just now",
+          publishedAt: "Not published",
+          status: "Draft",
+          statusStyle: "gray",
+        });
+
+        closeModal();
+        renderTable();
+        showToast("Workspace created and linked.");
+      }
+
+      function addSelectedExisting() {
+        const selected = existingWorkspaces.filter((workspace) => state.selectedExisting.has(workspace.id));
+        if (!selected.length) return;
+
+        state.workspaces.push(...selected.map((workspace) => ({ ...workspace })));
+        closeModal();
+        renderTable();
+        showToast(`${selected.length} workspace${selected.length === 1 ? "" : "s"} linked.`);
+      }
+
+      document.querySelectorAll(".tab").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.activeTab = button.dataset.tab;
+          document.querySelectorAll(".tab").forEach((tab) => {
+            const isActive = tab === button;
+            tab.classList.toggle("active", isActive);
+            tab.setAttribute("aria-selected", String(isActive));
+          });
+          renderTable();
+        });
+      });
+
+      document.getElementById("channelFilters").addEventListener("click", (event) => {
+        const button = event.target.closest("[data-channel]");
+        if (!button) return;
+        state.activeChannel = button.dataset.channel;
+        document.querySelectorAll("[data-channel]").forEach((chipButton) => chipButton.classList.toggle("active", chipButton === button));
+        renderTable();
+      });
+
+      tagFilter.addEventListener("input", renderTable);
+      nameSearch.addEventListener("input", renderTable);
+      addWorkspaceButton.addEventListener("click", openModal);
+      closeWorkspaceModal.addEventListener("click", closeModal);
+      cancelWorkspaceModal.addEventListener("click", closeModal);
+      backStepButton.addEventListener("click", () => setModalStep("option"));
+      nextStepButton.addEventListener("click", () => setModalStep(state.selectedOption));
+      createWorkspaceButton.addEventListener("click", createWorkspace);
+      addSelectedButton.addEventListener("click", addSelectedExisting);
+
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) closeModal();
+
+        const choice = event.target.closest("[data-option]");
+        if (choice) {
+          state.selectedOption = choice.dataset.option;
+          document.querySelectorAll(".choice-card").forEach((card) => card.classList.toggle("selected", card === choice));
+          nextStepButton.disabled = false;
+        }
+      });
+
+      existingList.addEventListener("change", (event) => {
+        if (event.target.matches('input[type="checkbox"]')) {
+          if (event.target.checked) {
+            state.selectedExisting.add(event.target.value);
+          } else {
+            state.selectedExisting.delete(event.target.value);
+          }
+          renderExistingList();
+        }
+      });
+
+      tableBody.addEventListener("click", (event) => {
+        const openButton = event.target.closest("[data-open-workspace]");
+        if (openButton) showToast("Workspace opened.");
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.hidden) closeModal();
+      });
+
+      ["railProducerLink", "homeProducerLink", "breadcrumbProducerLink", "topProducerLink"].forEach((id) => {
+        const link = document.getElementById(id);
+        link.addEventListener("click", (event) => {
+          if (window.location.protocol === "file:") {
+            event.preventDefault();
+            window.location.href = "../index.html";
+          }
+        });
+      });
+
+      renderTable();
+    </script>
+  </body>
+</html>

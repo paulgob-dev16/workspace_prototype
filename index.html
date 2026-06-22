@@ -1,0 +1,4119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Paul Live Template Editor Prototype</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f8fb;
+        --surface: #ffffff;
+        --surface-soft: #f8fbff;
+        --header: #eef3f9;
+        --line: #dfe8f2;
+        --line-strong: #cad7e6;
+        --text: #24324a;
+        --muted: #6f819c;
+        --purple: #7c2cff;
+        --purple-dark: #5f1ed8;
+        --purple-soft: #f0e8ff;
+        --purple-line: #9b5cff;
+        --cyan-soft: #eafcff;
+        --green: #058b54;
+        --green-soft: #e6faef;
+        --blue: #0878bd;
+        --blue-soft: #e7f4ff;
+        --yellow: #9c6500;
+        --yellow-soft: #fff4d6;
+        --red: #e0194d;
+        --shadow: 0 18px 54px rgba(30, 42, 62, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font-size: 14px;
+        letter-spacing: 0;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible,
+      textarea:focus-visible {
+        outline: 3px solid #cbb7ff;
+        outline-offset: 2px;
+      }
+
+      .app {
+        min-height: 100vh;
+      }
+
+      .topbar {
+        align-items: center;
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 20px;
+        justify-content: space-between;
+        padding: 22px 26px;
+      }
+
+      .eyebrow {
+        color: #61718a;
+        font-size: 14px;
+        font-weight: 650;
+        margin-bottom: 8px;
+      }
+
+      .meta {
+        color: #6d7e99;
+        font-size: 14px;
+      }
+
+      .top-actions,
+      .toolbar-actions {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        position: relative;
+      }
+
+      .primary-button,
+      .secondary-button,
+      .ghost-button,
+      .toolbar-button,
+      .icon-button {
+        align-items: center;
+        border-radius: 7px;
+        display: inline-flex;
+        font-weight: 800;
+        gap: 8px;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        white-space: nowrap;
+      }
+
+      .primary-button {
+        background: var(--purple);
+        border: 0;
+        box-shadow: 0 10px 18px rgba(124, 44, 255, 0.2);
+        color: #fff;
+      }
+
+      .primary-button:hover {
+        background: var(--purple-dark);
+      }
+
+      .secondary-button,
+      .ghost-button,
+      .toolbar-button,
+      .icon-button {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        color: #30415c;
+      }
+
+      .ghost-button:hover,
+      .secondary-button:hover,
+      .toolbar-button:hover,
+      .icon-button:hover {
+        background: var(--surface-soft);
+      }
+
+      .top-actions a.secondary-button {
+        text-decoration: none;
+      }
+
+      .icon-button {
+        padding: 0;
+        width: 42px;
+      }
+
+      .toolbar-button[disabled] {
+        color: #98a5b8;
+        cursor: not-allowed;
+        opacity: 0.75;
+      }
+
+      .dropdown,
+      .column-menu {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        min-width: 220px;
+        padding: 6px;
+        position: absolute;
+        right: 54px;
+        top: 50px;
+        z-index: 50;
+      }
+
+      .dropdown[hidden],
+      .column-menu[hidden] {
+        display: none;
+      }
+
+      .dropdown button {
+        background: transparent;
+        border: 0;
+        border-radius: 6px;
+        color: var(--text);
+        display: block;
+        font-weight: 650;
+        padding: 12px 14px;
+        text-align: left;
+        width: 100%;
+      }
+
+      .dropdown button:hover {
+        background: var(--surface-soft);
+      }
+
+      .column-menu {
+        right: 190px;
+        top: 46px;
+        width: 260px;
+      }
+
+      .column-menu-title {
+        color: #657792;
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.04em;
+        padding: 8px 10px;
+        text-transform: uppercase;
+      }
+
+      .column-option {
+        align-items: center;
+        border-radius: 6px;
+        display: flex;
+        gap: 10px;
+        padding: 9px 10px;
+      }
+
+      .column-option:hover {
+        background: var(--surface-soft);
+      }
+
+      .tabs-band,
+      .toolbar-band,
+      .filters-band {
+        background: var(--surface);
+        border-bottom: 1px solid var(--line);
+        padding: 16px 26px;
+      }
+
+      .tabs {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        display: inline-flex;
+        gap: 6px;
+        padding: 6px;
+      }
+
+      .tab {
+        background: transparent;
+        border: 0;
+        border-radius: 8px;
+        color: #4d5e78;
+        font-weight: 750;
+        min-width: 92px;
+        padding: 11px 16px;
+      }
+
+      .tab.active {
+        background: #10182d;
+        box-shadow: 0 8px 14px rgba(16, 24, 45, 0.18);
+        color: #fff;
+      }
+
+      .toolbar-band {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .search {
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        display: flex;
+        gap: 10px;
+        max-width: 480px;
+        min-width: 300px;
+        padding: 0 13px;
+        width: 34vw;
+      }
+
+      .search input {
+        border: 0;
+        color: var(--text);
+        height: 42px;
+        outline: 0;
+        width: 100%;
+      }
+
+      .search input::placeholder {
+        color: #95a4b9;
+      }
+
+      .count-badge {
+        align-items: center;
+        background: #e9eef6;
+        border-radius: 999px;
+        color: #51627a;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 800;
+        height: 22px;
+        justify-content: center;
+        min-width: 22px;
+        padding: 0 7px;
+      }
+
+      .filters-band {
+        padding-bottom: 14px;
+        padding-top: 14px;
+      }
+
+      .filters {
+        align-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 12px;
+      }
+
+      .filters-label {
+        color: #687b95;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        margin-right: 4px;
+        text-transform: uppercase;
+      }
+
+      .filter-chip {
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #30415c;
+        display: inline-flex;
+        font-weight: 750;
+        gap: 9px;
+        height: 36px;
+        padding: 0 14px;
+        white-space: nowrap;
+      }
+
+      .filter-chip.active {
+        background: var(--cyan-soft);
+        border-color: #bdeef4;
+        color: #127282;
+      }
+
+      .workspace {
+        padding: 0 26px 26px;
+        position: relative;
+      }
+
+      .view[hidden] {
+        display: none;
+      }
+
+      .table-shell {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 10px 26px rgba(34, 49, 76, 0.06);
+        isolation: isolate;
+        overflow: auto;
+        position: relative;
+      }
+
+      table {
+        border-collapse: separate;
+        border-spacing: 0;
+        min-width: 2320px;
+        position: relative;
+        table-layout: fixed;
+        width: 100%;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        border-right: 1px solid var(--line);
+        height: 74px;
+        padding: 12px 14px;
+        text-align: left;
+        vertical-align: middle;
+      }
+
+      th {
+        background: var(--header);
+        color: #394a63;
+        font-size: 12px;
+        font-weight: 850;
+      }
+
+      .group-head {
+        height: 40px;
+        padding-bottom: 8px;
+        padding-top: 8px;
+        text-transform: uppercase;
+      }
+
+      .sub-head {
+        height: 48px;
+        position: relative;
+      }
+
+      .content-head.connected-left,
+      .content-head.connected-right {
+        box-shadow: inset 0 -3px 0 var(--purple-line);
+      }
+
+      .connector-slot {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line-strong);
+        border-radius: 999px;
+        color: #75849a;
+        display: inline-flex;
+        height: 24px;
+        justify-content: center;
+        left: -12px;
+        opacity: 0;
+        padding: 0;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        transition: opacity 0.16s ease, background 0.16s ease, color 0.16s ease;
+        width: 24px;
+        z-index: 8;
+      }
+
+      .content-head:hover .connector-slot,
+      .connector-slot:focus-visible,
+      .connector-slot.connected {
+        opacity: 1;
+      }
+
+      .connector-slot.connected {
+        background: var(--purple);
+        border-color: var(--purple);
+        box-shadow: 0 0 0 3px #efe6ff;
+        color: #fff;
+      }
+
+      .variant-head,
+      .variant-cell {
+        background-clip: padding-box;
+        box-sizing: border-box;
+        left: 0;
+        max-width: 420px;
+        min-width: 420px;
+        overflow: hidden;
+        position: sticky;
+        width: 420px;
+        z-index: 30;
+      }
+
+      .variant-head {
+        background: var(--surface);
+        box-shadow: 1px 0 0 var(--line), 10px 0 18px rgba(34, 49, 76, 0.08);
+        z-index: 60;
+      }
+
+      .variant-cell {
+        background: var(--surface);
+        box-shadow: 1px 0 0 var(--line), 10px 0 18px rgba(34, 49, 76, 0.06);
+      }
+
+      .variant-head::after,
+      .variant-cell::after {
+        bottom: 0;
+        content: "";
+        pointer-events: none;
+        position: absolute;
+        right: -12px;
+        top: 0;
+        width: 12px;
+      }
+
+      .selected-row .variant-cell,
+      .selected-row td {
+        background: #f0feff;
+      }
+
+      .child-row .variant-cell,
+      .child-row td {
+        background: #f5feff;
+      }
+
+      .selected-row .variant-cell {
+        box-shadow: 1px 0 0 var(--line), 12px 0 18px rgba(18, 83, 97, 0.1);
+        z-index: 32;
+      }
+
+      .variant-header-line,
+      .variant-main {
+        align-items: center;
+        display: flex;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .variant-header-line {
+        justify-content: space-between;
+      }
+
+      .checkbox {
+        appearance: none;
+        background: #fff;
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        height: 18px;
+        margin: 0;
+        width: 18px;
+      }
+
+      .checkbox:checked {
+        background: var(--purple);
+        border-color: var(--purple);
+        box-shadow: inset 0 0 0 4px #fff;
+      }
+
+      .chevron {
+        align-items: center;
+        background: transparent;
+        border: 0;
+        color: #526680;
+        display: inline-flex;
+        flex: 0 0 auto;
+        font-size: 17px;
+        height: 28px;
+        justify-content: center;
+        padding: 0;
+        width: 22px;
+      }
+
+      .toggle {
+        background: #dfe7f1;
+        border: 0;
+        border-radius: 999px;
+        flex: 0 0 auto;
+        height: 20px;
+        padding: 0;
+        position: relative;
+        width: 38px;
+      }
+
+      .toggle::after {
+        background: #fff;
+        border-radius: 50%;
+        box-shadow: 0 1px 5px rgba(28, 40, 58, 0.18);
+        content: "";
+        height: 16px;
+        left: 2px;
+        position: absolute;
+        top: 2px;
+        transition: transform 0.16s ease;
+        width: 16px;
+      }
+
+      .toggle.on {
+        background: var(--purple);
+      }
+
+      .toggle.on::after {
+        transform: translateX(18px);
+      }
+
+      .variant-text,
+      .cell-content,
+      .asset-text {
+        min-width: 0;
+      }
+
+      .variant-name,
+      .asset-name,
+      .truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .variant-name {
+        color: #1f2b43;
+        font-size: 14px;
+        font-weight: 850;
+      }
+
+      .variant-subline {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-left: 72px;
+        margin-top: 10px;
+      }
+
+      .row-menu {
+        background: transparent;
+        border: 0;
+        color: #526680;
+        font-size: 20px;
+        margin-left: auto;
+        padding: 2px 4px;
+      }
+
+      .chip {
+        align-items: center;
+        background: #eef3f8;
+        border: 1px solid transparent;
+        border-radius: 999px;
+        color: #53647b;
+        display: inline-flex;
+        font-size: 11px;
+        font-weight: 850;
+        gap: 4px;
+        line-height: 1;
+        max-width: 160px;
+        min-height: 22px;
+        overflow: hidden;
+        padding: 0 9px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .chip.purple {
+        background: var(--purple-soft);
+        color: var(--purple);
+      }
+
+      .chip.green {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .chip.blue {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .chip.yellow {
+        background: var(--yellow-soft);
+        color: var(--yellow);
+      }
+
+      .chip.gray {
+        background: #eef2f7;
+        color: #617088;
+      }
+
+      .chip.red {
+        background: #ffe8ef;
+        color: var(--red);
+      }
+
+      .cell-stack,
+      .chip-row {
+        display: flex;
+        gap: 6px;
+      }
+
+      .cell-stack {
+        flex-direction: column;
+      }
+
+      .chip-row {
+        align-items: center;
+        flex-wrap: nowrap;
+        min-width: 0;
+      }
+
+      .mono {
+        background: #eef3f8;
+        border-radius: 4px;
+        color: #53647b;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        padding: 2px 5px;
+        white-space: nowrap;
+      }
+
+      .editable-td {
+        position: relative;
+      }
+
+      .editable-td[data-edit-cell] {
+        cursor: pointer;
+      }
+
+      .editable-td .cell-content {
+        padding-right: 18px;
+      }
+
+      .edit-pencil {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: #596b84;
+        display: inline-flex;
+        height: 26px;
+        justify-content: center;
+        opacity: 0;
+        padding: 0;
+        position: absolute;
+        right: 8px;
+        top: 8px;
+        transition: opacity 0.15s ease, background 0.15s ease;
+        width: 26px;
+      }
+
+      .editable-td:hover .edit-pencil,
+      .edit-pencil:focus-visible {
+        opacity: 1;
+      }
+
+      .edit-pencil:hover {
+        background: var(--purple-soft);
+        border-color: #d8c7ff;
+        color: var(--purple);
+      }
+
+      .targeting-td {
+        overflow: visible;
+        position: relative;
+      }
+
+      .rule-control,
+      .filter-control {
+        align-items: center;
+        background: #fbfdff;
+        border: 1px dashed var(--line);
+        border-radius: 7px;
+        color: #30415c;
+        display: flex;
+        gap: 8px;
+        min-height: 34px;
+        max-width: 100%;
+        padding: 5px 7px;
+        text-align: left;
+      }
+
+      .rule-control {
+        justify-content: space-between;
+      }
+
+      .filter-control {
+        justify-content: space-between;
+        width: 100%;
+      }
+
+      .rule-control:hover,
+      .filter-control:hover,
+      .rule-control:focus-visible,
+      .filter-control:focus-visible {
+        background: var(--surface-soft);
+        border-color: #cdb8ff;
+      }
+
+      .filter-control[disabled] {
+        background: #fbfdff;
+        border-color: var(--line);
+        cursor: default;
+      }
+
+      .schedule-select {
+        background: #fbfdff;
+        border: 1px dashed var(--line);
+        border-radius: 7px;
+        color: #30415c;
+        min-height: 34px;
+        padding: 0 8px;
+        width: 100%;
+      }
+
+      .schedule-empty {
+        align-items: center;
+        display: flex;
+        gap: 8px;
+      }
+
+      .select-arrow,
+      .add-square {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line-strong);
+        border-radius: 5px;
+        color: #63758f;
+        display: inline-flex;
+        flex: 0 0 auto;
+        height: 24px;
+        justify-content: center;
+        width: 24px;
+      }
+
+      .filter-placeholder {
+        color: #8a9bb4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .targeting-popover {
+        width: 360px;
+      }
+
+      .targeting-popover.wide {
+        width: 390px;
+      }
+
+      .popover-headline {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        margin: -14px -14px 12px;
+        padding: 12px 14px;
+      }
+
+      .popover-headline .popover-title {
+        margin: 0;
+      }
+
+      .text-button {
+        background: transparent;
+        border: 0;
+        color: #40516c;
+        font-weight: 750;
+        padding: 3px 0;
+      }
+
+      .text-button:hover {
+        color: var(--purple);
+      }
+
+      .rule-list,
+      .value-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 260px;
+        overflow: auto;
+      }
+
+      .rule-option-button,
+      .value-option-button {
+        align-items: center;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 6px;
+        color: #2d3e59;
+        display: flex;
+        justify-content: space-between;
+        min-height: 34px;
+        padding: 8px 9px;
+        text-align: left;
+      }
+
+      .rule-option-button:hover,
+      .value-option-button:hover {
+        background: var(--surface-soft);
+      }
+
+      .rule-option-button.selected,
+      .value-option-button.selected {
+        background: #f7f1ff;
+        border-color: #ccb4ff;
+      }
+
+      .value-search {
+        margin-bottom: 10px;
+        width: 100%;
+      }
+
+      .value-search input {
+        border: 1px solid var(--line-strong);
+        border-radius: 7px;
+        min-height: 38px;
+        padding: 0 10px;
+        width: 100%;
+      }
+
+      .popover-footer-link {
+        border-top: 1px solid var(--line);
+        margin: 10px -14px -14px;
+        padding: 10px 14px;
+      }
+
+      .asset {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .asset-thumb {
+        align-items: center;
+        background: linear-gradient(135deg, #d8c4a7, #8599a5 42%, #423f50);
+        border-radius: 6px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.42);
+        color: #fff;
+        display: flex;
+        flex: 0 0 auto;
+        font-size: 15px;
+        height: 42px;
+        justify-content: center;
+        overflow: hidden;
+        width: 42px;
+      }
+
+      .asset-thumb.holiday {
+        background: radial-gradient(circle at 50% 30%, #53efff, #0b6bdf 42%, #111a52 74%);
+      }
+
+      .asset-thumb.crm {
+        background: linear-gradient(135deg, #c6b99a, #778170 50%, #a2a78e);
+      }
+
+      .asset-thumb.black {
+        background: linear-gradient(135deg, #a8b3b8, #d63428 52%, #353641);
+      }
+
+      .asset-thumb.launch {
+        background: linear-gradient(135deg, #e7e4d8, #8ba3b1 48%, #314355);
+      }
+
+      .asset-thumb.brand {
+        background: linear-gradient(135deg, #223c2d, #82a55a 52%, #d9e3b8);
+      }
+
+      .asset-thumb.demo {
+        background: linear-gradient(135deg, #2b5174, #7db0bd 52%, #e2e6dc);
+      }
+
+      .asset-thumb.motion {
+        background: linear-gradient(135deg, #312c5f, #9363c8 52%, #e5daf6);
+      }
+
+      .asset-name {
+        color: #2f3d55;
+        display: block;
+        font-weight: 750;
+      }
+
+      .asset-sub {
+        color: #71839d;
+        display: block;
+        font-size: 12px;
+        line-height: 1.25;
+      }
+
+      .empty {
+        color: #7d8da5;
+      }
+
+      .preview-rail {
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px 0 0 12px;
+        box-shadow: 0 10px 24px rgba(34, 49, 76, 0.12);
+        color: #40516c;
+        display: flex;
+        flex-direction: column;
+        font-size: 12px;
+        font-weight: 850;
+        gap: 10px;
+        height: 132px;
+        justify-content: center;
+        position: fixed;
+        right: 0;
+        top: 260px;
+        width: 50px;
+        writing-mode: vertical-rl;
+        z-index: 15;
+      }
+
+      .toast {
+        background: #15213a;
+        border-radius: 8px;
+        bottom: 24px;
+        box-shadow: var(--shadow);
+        color: #fff;
+        font-weight: 750;
+        left: 50%;
+        opacity: 0;
+        padding: 13px 16px;
+        pointer-events: none;
+        position: fixed;
+        transform: translate(-50%, 14px);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+        z-index: 100;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      .modal-overlay {
+        align-items: center;
+        background: rgba(18, 28, 45, 0.42);
+        display: flex;
+        inset: 0;
+        justify-content: center;
+        padding: 28px;
+        position: fixed;
+        z-index: 80;
+      }
+
+      .modal-overlay[hidden] {
+        display: none;
+      }
+
+      .modal {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        box-shadow: var(--shadow);
+        max-height: calc(100vh - 56px);
+        max-width: 1050px;
+        overflow: auto;
+        width: min(1050px, 100%);
+      }
+
+      .modal.compact {
+        max-width: 620px;
+      }
+
+      .modal-head,
+      .modal-footer {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        padding: 22px 28px;
+      }
+
+      .modal-head h2 {
+        font-size: 22px;
+        line-height: 1.2;
+        margin: 0;
+      }
+
+      .modal-close {
+        background: transparent;
+        border: 0;
+        color: #586a84;
+        font-size: 28px;
+        line-height: 1;
+        padding: 0 4px;
+      }
+
+      .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 0 28px 22px;
+      }
+
+      .modal-footer {
+        border-top: 1px solid var(--line);
+        gap: 12px;
+      }
+
+      .footer-left,
+      .footer-right {
+        display: flex;
+        gap: 10px;
+      }
+
+      .variant-block,
+      .form-panel,
+      .logic-tier,
+      .logic-section {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .variant-block,
+      .form-panel {
+        padding: 22px;
+      }
+
+      .variant-block-title {
+        font-size: 17px;
+        font-weight: 850;
+        margin-bottom: 22px;
+      }
+
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .field label,
+      .method-title,
+      .section-label {
+        color: #31425d;
+        font-weight: 800;
+      }
+
+      .field input,
+      .field select,
+      .field textarea,
+      .inline-input,
+      .inline-select {
+        background: #fff;
+        border: 1px solid var(--line-strong);
+        border-radius: 7px;
+        color: var(--text);
+        min-height: 40px;
+        outline: 0;
+        padding: 0 12px;
+      }
+
+      .field textarea {
+        min-height: 92px;
+        padding: 10px 12px;
+        resize: vertical;
+      }
+
+      .field input.invalid,
+      .field select.invalid,
+      .field textarea.invalid {
+        border-color: var(--red);
+      }
+
+      .error {
+        color: var(--red);
+        font-size: 13px;
+        min-height: 18px;
+      }
+
+      .radio-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .radio-row {
+        align-items: center;
+        color: #31425d;
+        display: flex;
+        gap: 10px;
+        font-weight: 650;
+      }
+
+      .radio-row input {
+        accent-color: var(--purple);
+        height: 18px;
+        width: 18px;
+      }
+
+      .helper {
+        color: #71839d;
+        font-size: 13px;
+        line-height: 1.35;
+        margin: 6px 0 0;
+      }
+
+      .duplicate-fields {
+        margin-left: 28px;
+        margin-top: 12px;
+        max-width: 580px;
+      }
+
+      .popover {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: var(--shadow);
+        display: none;
+        padding: 14px;
+        position: fixed;
+        width: 380px;
+        z-index: 70;
+      }
+
+      .popover.show {
+        display: block;
+      }
+
+      .popover.wide {
+        width: 520px;
+      }
+
+      .popover-title {
+        color: #24324a;
+        font-size: 16px;
+        font-weight: 850;
+        margin-bottom: 12px;
+      }
+
+      .readonly-box,
+      .preview-box {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        color: #4f617a;
+        margin-bottom: 12px;
+        min-height: 36px;
+        padding: 9px 10px;
+      }
+
+      .popover-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 12px;
+      }
+
+      .asset-list {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 1fr 1fr;
+        margin: 8px 0 12px;
+      }
+
+      .asset-option {
+        align-items: center;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        display: flex;
+        gap: 9px;
+        padding: 8px;
+        text-align: left;
+      }
+
+      .asset-option.selected {
+        background: var(--purple-soft);
+        border-color: #c7adff;
+        box-shadow: inset 0 0 0 1px #c7adff;
+      }
+
+      .connector-popover {
+        width: 300px;
+      }
+
+      .logic-page {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .logic-header {
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        padding: 18px 20px;
+      }
+
+      .logic-header h2 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+
+      .logic-tier {
+        overflow: hidden;
+      }
+
+      .tier-head {
+        align-items: center;
+        border-bottom: 1px solid var(--line);
+        display: flex;
+        gap: 10px;
+        justify-content: space-between;
+        padding: 14px 16px;
+      }
+
+      .tier-title {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .tier-number {
+        align-items: center;
+        background: #10182d;
+        border-radius: 999px;
+        color: #fff;
+        display: inline-flex;
+        font-size: 12px;
+        font-weight: 900;
+        height: 22px;
+        justify-content: center;
+        width: 22px;
+      }
+
+      .tier-title strong {
+        white-space: nowrap;
+      }
+
+      .tier-actions {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+      }
+
+      .tier-body {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1fr 1.35fr;
+        padding: 14px 16px 16px;
+      }
+
+      .tier-body.single {
+        grid-template-columns: 1fr;
+      }
+
+      .logic-section {
+        padding: 14px;
+      }
+
+      .section-label {
+        color: #657792;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+      }
+
+      .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .mapping-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .mapping-row {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 7px;
+        padding: 10px;
+      }
+
+      .mapping-row strong {
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .schedule-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .schedule-grid.full {
+        grid-template-columns: 1fr;
+      }
+
+      .preset-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .preset-chip {
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: #30415c;
+        font-weight: 800;
+        min-height: 34px;
+        padding: 0 12px;
+      }
+
+      .preset-chip.selected {
+        background: var(--purple-soft);
+        border-color: #c7adff;
+        color: var(--purple);
+      }
+
+      .day-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .day-row {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .day-main,
+      .time-range {
+        align-items: center;
+        display: grid;
+        gap: 8px;
+        grid-template-columns: 26px 120px minmax(96px, 1fr) minmax(96px, 1fr) auto;
+      }
+
+      .time-range {
+        grid-template-columns: 146px minmax(96px, 1fr) minmax(96px, 1fr) auto;
+        margin-top: 8px;
+      }
+
+      .day-row input[type="time"],
+      .day-row input[type="date"] {
+        min-width: 0;
+      }
+
+      .schedule-summary {
+        background: var(--surface-soft);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+      }
+
+      .schedule-footer {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        justify-content: flex-end;
+        padding: 0 16px 16px;
+      }
+
+      .rule-options {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .rule-option {
+        align-items: flex-start;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        display: flex;
+        gap: 10px;
+        padding: 13px;
+      }
+
+      .rule-option.selected {
+        background: var(--purple-soft);
+        border-color: #c7adff;
+      }
+
+      .sr-only {
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      @media (max-width: 900px) {
+        .topbar,
+        .toolbar-band,
+        .logic-header {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .top-actions,
+        .toolbar-actions,
+        .toolbar-band {
+          justify-content: flex-start;
+        }
+
+        .search {
+          max-width: none;
+          min-width: 0;
+          width: 100%;
+        }
+
+        .toolbar-band {
+          overflow-x: auto;
+        }
+
+        .variant-head,
+        .variant-cell {
+          max-width: 340px;
+          min-width: 340px;
+          width: 340px;
+        }
+
+        .tier-body,
+        .schedule-grid,
+        .rule-options,
+        .asset-list {
+          grid-template-columns: 1fr;
+        }
+
+        .modal-footer {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .footer-left,
+        .footer-right {
+          justify-content: flex-end;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Producers &gt; Paul Live Template Editor</div>
+          <div class="meta" id="producerMeta">13 creatives in total (6 approved) &bull; 1 day ago</div>
+        </div>
+        <div class="top-actions">
+          <a class="secondary-button" href="/projects" id="projectsPrototypeLink">Projects</a>
+          <button class="primary-button" id="addVariantButton" type="button" aria-haspopup="menu" aria-expanded="false">
+            Add Variant
+            <span aria-hidden="true">⌄</span>
+          </button>
+          <div class="dropdown" id="addVariantMenu" hidden role="menu">
+            <button type="button" role="menuitem" data-action="add-manually">Add manually</button>
+            <button type="button" role="menuitem" data-action="generate-ai">Generate with AI</button>
+          </div>
+          <button class="icon-button" type="button" title="Settings" aria-label="Settings">⚙</button>
+        </div>
+      </header>
+
+      <section class="tabs-band" aria-label="Main navigation">
+        <div class="tabs" id="tabs">
+          <button class="tab active" type="button" data-tab="table">Table</button>
+          <button class="tab" type="button" data-tab="preview">Preview</button>
+          <button class="tab" type="button" data-tab="logic">Logic</button>
+        </div>
+      </section>
+
+      <section class="toolbar-band" aria-label="Table tools">
+        <label class="search" aria-label="Search variants">
+          <span aria-hidden="true">⌕</span>
+          <input id="searchInput" type="search" placeholder="Search within this producer..." />
+        </label>
+        <div class="toolbar-actions">
+          <button class="toolbar-button" type="button">▽ Filters</button>
+          <button class="toolbar-button" id="columnButton" type="button" aria-haspopup="menu" aria-expanded="false">
+            ▥ Column management <span class="count-badge" id="hiddenColumnCount">0</span>
+          </button>
+          <div class="column-menu" id="columnMenu" hidden></div>
+          <button class="toolbar-button" type="button">↶ Undo</button>
+          <button class="toolbar-button" type="button" disabled>↷ Redo</button>
+          <button class="toolbar-button" type="button">Actions</button>
+        </div>
+      </section>
+
+      <section class="filters-band" id="filtersBand">
+        <div class="filters" id="logicFilters" aria-label="Logic filters"></div>
+      </section>
+
+      <main class="workspace">
+        <section class="view" id="tableView">
+          <div class="table-shell" id="tableShell">
+            <table aria-label="Live template editor table">
+              <colgroup id="tableColgroup"></colgroup>
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="view" id="previewView" hidden>
+          <div class="logic-header">
+            <div>
+              <h2>Preview</h2>
+              <div class="helper">Preview is available as the right rail in this phase.</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="view" id="logicView" hidden>
+          <div class="logic-page">
+            <div class="logic-header">
+              <div>
+                <h2>Logic tiers</h2>
+                <div class="helper">Create reusable targeting tiers, then assign them from the table.</div>
+              </div>
+              <button class="primary-button" id="addTierButton" type="button">+ Add tier</button>
+            </div>
+            <div id="logicTiers"></div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="preview-rail">Preview <span aria-hidden="true">⊙</span></aside>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="modal-overlay" id="variantModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="variantModalTitle">
+        <div class="modal-head">
+          <h2 id="variantModalTitle">Add variants</h2>
+          <button class="modal-close" id="closeModalButton" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="modal-body" id="variantBlocks"></div>
+        <div class="modal-footer">
+          <div class="footer-left">
+            <button class="secondary-button" id="addAnotherButton" type="button">Add another variant</button>
+          </div>
+          <div class="footer-right">
+            <button class="ghost-button" id="cancelModalButton" type="button">Cancel</button>
+            <button class="primary-button" id="createVariantsButton" type="button">Create variants</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-overlay" id="tierModal" hidden>
+      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="tierModalTitle">
+        <div class="modal-head">
+          <h2 id="tierModalTitle">Add logic tier</h2>
+          <button class="modal-close" id="closeTierModalButton" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="method-title">Select rule type</div>
+          <div class="rule-options" id="ruleOptions"></div>
+        </div>
+        <div class="modal-footer">
+          <div></div>
+          <div class="footer-right">
+            <button class="ghost-button" id="cancelTierButton" type="button">Cancel</button>
+            <button class="primary-button" id="createTierButton" type="button">Create rule</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-overlay" id="mappingModal" hidden>
+      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="mappingModalTitle">
+        <div class="modal-head">
+          <h2 id="mappingModalTitle">Add ID mapping</h2>
+          <button class="modal-close" id="closeMappingModalButton" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="modal-body" id="mappingForm"></div>
+        <div class="modal-footer">
+          <div></div>
+          <div class="footer-right">
+            <button class="ghost-button" id="cancelMappingButton" type="button">Cancel</button>
+            <button class="primary-button" id="addMappingButton" type="button">Add mapping</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-overlay" id="confirmTypeModal" hidden>
+      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="confirmTypeTitle">
+        <div class="modal-head">
+          <h2 id="confirmTypeTitle">Change rule type?</h2>
+        </div>
+        <div class="modal-body">
+          <p class="helper" style="margin: 0">Changing the rule type will clear the current configuration for this tier.</p>
+        </div>
+        <div class="modal-footer">
+          <div></div>
+          <div class="footer-right">
+            <button class="ghost-button" id="cancelTypeChangeButton" type="button">Cancel</button>
+            <button class="primary-button" id="confirmTypeChangeButton" type="button">Change rule type</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="modal-overlay" id="confirmDeleteModal" hidden>
+      <section class="modal compact" role="dialog" aria-modal="true" aria-labelledby="confirmDeleteTitle">
+        <div class="modal-head">
+          <h2 id="confirmDeleteTitle">Delete schedule?</h2>
+        </div>
+        <div class="modal-body">
+          <p class="helper" id="confirmDeleteMessage" style="margin: 0"></p>
+        </div>
+        <div class="modal-footer">
+          <div></div>
+          <div class="footer-right">
+            <button class="ghost-button" id="cancelDeleteButton" type="button">Cancel</button>
+            <button class="primary-button" id="confirmDeleteButton" type="button">Delete schedule</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="popover" id="editPopover" aria-live="polite"></div>
+    <div class="popover connector-popover" id="connectorPopover"></div>
+    <div class="popover targeting-popover" id="targetingPopover"></div>
+
+    <script>
+      const ruleTypes = ["Audience Targeting", "Schedule Targeting", "Geo Targeting", "Weather Targeting", "Product Match"];
+      const contentColumns = [
+        { id: "headline", label: "Headline", width: 330 },
+        { id: "cta", label: "CTA", width: 260 },
+        { id: "image", label: "Image", width: 280 },
+        { id: "video", label: "Video", width: 280 },
+      ];
+      const contentPairs = [
+        { id: "headline-cta", from: "headline", to: "cta" },
+        { id: "image-video", from: "image", to: "video" },
+      ];
+      const supportedMacros = ["headline", "cta", "image", "video", "variant_name", "platform", "format", "ad_type"];
+      const imageAssets = [
+        { name: "hero_product_shot", sub: "2 crops", thumb: "hero" },
+        { name: "holiday_offer", sub: "2 crops", thumb: "holiday" },
+        { name: "crm_offer", sub: "2 crops", thumb: "crm" },
+        { name: "black_friday", sub: "1 crop", thumb: "black" },
+        { name: "default_brand", sub: "Ready", thumb: "brand" },
+      ];
+      const videoAssets = [
+        { name: "launch_burst", sub: "Adapted across formats", thumb: "launch", play: true },
+        { name: "black_friday_video", sub: "Ready", thumb: "black", play: true },
+        { name: "product_demo_cutdown", sub: "15s", thumb: "demo", play: true },
+        { name: "holiday_countdown_video", sub: "6s", thumb: "holiday", play: true },
+        { name: "default_brand_motion", sub: "Adapted across formats", thumb: "motion", play: true },
+      ];
+      const idTypes = [
+        "DV360 Line Item ID",
+        "CM360 Placement ID",
+        "CM360 Ad ID",
+        "CM360 Site ID",
+        "CM360 1st Party Audience",
+        "CM360 Dynamic Targeting Keys",
+      ];
+      const weekDays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+      const timezones = ["Account timezone", "UTC", "Europe/London", "America/New_York", "America/Los_Angeles", "Asia/Singapore", "Asia/Tokyo", "Australia/Sydney"];
+      const schedulePresets = {
+        Weekend: { days: ["Saturday", "Sunday"] },
+        Weekdays: { days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"] },
+        Morning: { range: { start: "06:00", end: "12:00" } },
+        Afternoon: { range: { start: "12:00", end: "17:00" } },
+        Evening: { range: { start: "17:00", end: "22:00" } },
+      };
+
+      const initialVariants = [
+        {
+          id: "product-detail",
+          name: "Product Detail Dynamic Creative",
+          enabled: true,
+          expanded: true,
+          status: ["Active 2/2", "2 combinations"],
+          statusStyles: ["purple", "gray"],
+          logic: "Audience targeting",
+          scheduleId: "",
+          publishing: [{ label: "Running 2", style: "green" }],
+          creativeName: "{{variant_name}}_{{platform}}_{{format}}",
+          templates: { creativeName: "{{variant_name}}_{{platform}}_{{format}}", headline: "{{headline}}", cta: "{{cta}}", image: "{{image}}", video: "{{video}}" },
+          targeting: { rule: "Audience targeting", filters: ["High-value shoppers"] },
+          platforms: ["Google"],
+          adTypes: ["Display ad"],
+          quality: [{ label: "Ready 2", style: "green" }],
+          content: {
+            headline: "Performance starts here • Upgrade your setup",
+            cta: "Shop now • Learn more",
+            image: { name: "hero_product_shot", sub: "2 crops", thumb: "hero" },
+            video: null,
+          },
+          formats: [
+            { name: "728x90", source: "728x90-Smartly_Demo (2)", publishing: "Running", combinations: "1 combination" },
+            { name: "300x600", source: "300x600-Smartly_Demo (1)", publishing: "Running", combinations: "1 combination" },
+          ],
+        },
+        {
+          id: "london-offer",
+          name: "London Offer Social Push",
+          enabled: true,
+          expanded: false,
+          status: ["Active 2/2", "2 combinations"],
+          statusStyles: ["purple", "gray"],
+          logic: "Audience targeting",
+          scheduleId: "",
+          publishing: [{ label: "Scheduled 2", style: "blue" }],
+          creativeName: "{{variant_name}}_{{platform}}_{{format}}",
+          templates: { creativeName: "{{variant_name}}_{{platform}}_{{format}}" },
+          targeting: { rule: "Audience targeting", filters: ["Lapsed buyers"] },
+          platforms: ["Meta"],
+          adTypes: ["Social ad", "Story ad"],
+          quality: [{ label: "Ready 2", style: "green" }],
+          content: {
+            headline: "Holiday pricing is live • Countdown to holiday deals",
+            cta: "Shop gifts • See offers",
+            image: { name: "holiday_offer", sub: "2 crops", thumb: "holiday" },
+            video: null,
+          },
+          formats: [],
+        },
+        {
+          id: "retargeting",
+          name: "Product Retargeting Offer",
+          enabled: true,
+          expanded: false,
+          status: ["Active 2/2", "2 combinations"],
+          statusStyles: ["purple", "gray"],
+          logic: "Audience targeting",
+          scheduleId: "",
+          publishing: [
+            { label: "Not running 1", style: "gray" },
+            { label: "Not published 1", style: "gray" },
+          ],
+          creativeName: "{{variant_name}}_{{platform}}_{{format}}",
+          templates: { creativeName: "{{variant_name}}_{{platform}}_{{format}}" },
+          targeting: { rule: "Audience targeting", filters: ["Students"] },
+          platforms: ["Google"],
+          adTypes: ["Display ad"],
+          quality: [
+            { label: "Fix 1", style: "yellow" },
+            { label: "Not scored 1", style: "gray" },
+          ],
+          content: {
+            headline: "Pick up where you left off • Still interested?",
+            cta: "Return now • Finish checkout",
+            image: { name: "crm_offer", sub: "2 crops", thumb: "crm" },
+            video: null,
+          },
+          formats: [],
+        },
+        {
+          id: "regional-countdown",
+          name: "Regional Promo Countdown",
+          enabled: true,
+          expanded: false,
+          status: ["Active 2/2", "2 combinations"],
+          statusStyles: ["purple", "gray"],
+          logic: "No targeting",
+          scheduleId: "",
+          publishing: [{ label: "Not running 2", style: "gray" }],
+          creativeName: "{{variant_name}}_{{platform}}_{{format}}",
+          templates: { creativeName: "{{variant_name}}_{{platform}}_{{format}}" },
+          targeting: { rule: "No targeting", filters: [] },
+          platforms: ["Google", "YouTube"],
+          adTypes: ["Display ad", "Video ad"],
+          quality: [
+            { label: "Ready 1", style: "green" },
+            { label: "Fix 1", style: "yellow" },
+          ],
+          content: {
+            headline: "Black Friday ends soon • Black Friday final hours",
+            cta: "Shop now • Watch offers",
+            image: { name: "black_friday", sub: "1 crop", thumb: "black" },
+            video: { name: "black_friday_video", sub: "Adapted across formats", thumb: "black", play: true },
+          },
+          formats: [],
+        },
+        {
+          id: "launch-video",
+          name: "Product Launch Video Burst",
+          enabled: true,
+          expanded: false,
+          status: ["Active 2/2", "2 combinations"],
+          statusStyles: ["purple", "gray"],
+          logic: "Daypart targeting",
+          scheduleId: "tier-schedule",
+          publishing: [{ label: "Partially running 2", style: "yellow" }],
+          creativeName: "{{variant_name}}_{{platform}}_{{format}}",
+          templates: { creativeName: "{{variant_name}}_{{platform}}_{{format}}" },
+          targeting: { rule: "Daypart targeting", filters: ["Weekend", "Evening"] },
+          platforms: ["YouTube"],
+          adTypes: ["Video ad", "Shorts ad"],
+          quality: [{ label: "Fix 2", style: "yellow" }],
+          content: {
+            headline: "Meet the new lineup • Launch day vertical cut",
+            cta: "Watch now • See reveal",
+            image: null,
+            video: { name: "launch_burst", sub: "Adapted across formats", thumb: "launch", play: true },
+          },
+          formats: [],
+        },
+        {
+          id: "fallback-brand",
+          name: "Fallback Brand Creative",
+          enabled: true,
+          expanded: false,
+          status: ["Active 1/1", "Fallback", "1 combination"],
+          statusStyles: ["purple", "yellow", "gray"],
+          logic: "Fallback",
+          scheduleId: "",
+          publishing: [{ label: "Running 1", style: "green" }],
+          creativeName: "Fallback Brand Creative_728x90",
+          templates: { creativeName: "Fallback Brand Creative_728x90" },
+          targeting: { rule: "No targeting", filters: [] },
+          platforms: ["Google"],
+          adTypes: ["Display ad"],
+          quality: [{ label: "Ready 1", style: "green" }],
+          content: {
+            headline: "Built for every moment",
+            cta: "Explore now",
+            image: { name: "default_brand", sub: "Ready", thumb: "brand" },
+            video: null,
+          },
+          formats: [],
+        },
+      ];
+
+      const state = {
+        activeTab: "table",
+        variants: initialVariants,
+        activeLogic: "All",
+        search: "",
+        addMenuOpen: false,
+        columnMenuOpen: false,
+        hiddenContentColumns: new Set(),
+        connections: {
+          "headline-cta": true,
+          "image-video": true,
+        },
+        modalBlocks: [],
+        submitted: false,
+        totalCreatives: 13,
+        approvedCreatives: 6,
+        editing: null,
+        connector: null,
+        targeting: null,
+        tierDraftType: "Audience Targeting",
+        mappingDraft: { tierId: "", idType: "", values: "", displayName: "", submitted: false },
+        pendingTypeChange: null,
+        pendingDelete: null,
+        logicTiers: [
+          {
+            id: "tier-audience",
+            number: 1,
+            type: "Audience Targeting",
+            active: true,
+            usedBy: 3,
+            segmentName: "High-value shoppers",
+            entryMethod: "Manual entry",
+            sourceStatus: "Linked workspace",
+            mappings: [
+              { idType: "DV360 Line Item ID", values: ["7234501"], displayName: "High-value shoppers" },
+              { idType: "CM360 Placement ID", values: ["988045612"], displayName: "High-value shoppers - Meta" },
+            ],
+          },
+          {
+            id: "tier-schedule",
+            number: 2,
+            type: "Schedule Targeting",
+            active: true,
+            usedBy: 1,
+            ruleName: "Weekend morning schedule",
+            condition: "Dayparting",
+            timezone: "Europe/London",
+            startDate: "2026-01-01",
+            endDate: "2026-01-31",
+            presets: ["Weekend", "Morning"],
+            customized: false,
+            scheduleSubmitted: false,
+            days: {
+              Monday: { enabled: false, ranges: [{ start: "09:00", end: "17:00" }], touched: false },
+              Tuesday: { enabled: false, ranges: [{ start: "09:00", end: "17:00" }], touched: false },
+              Wednesday: { enabled: false, ranges: [{ start: "09:00", end: "17:00" }], touched: false },
+              Thursday: { enabled: false, ranges: [{ start: "09:00", end: "17:00" }], touched: false },
+              Friday: { enabled: false, ranges: [{ start: "09:00", end: "17:00" }], touched: false },
+              Saturday: { enabled: true, ranges: [{ start: "06:00", end: "12:00" }], touched: false },
+              Sunday: { enabled: true, ranges: [{ start: "06:00", end: "12:00" }], touched: false },
+            },
+            values: ["Weekdays", "Weekend", "Evening"],
+            assigned: ["Product Launch Video Burst"],
+          },
+          {
+            id: "tier-geo",
+            number: 3,
+            type: "Geo Targeting",
+            active: true,
+            usedBy: 0,
+            values: ["London", "Manchester", "Birmingham"],
+            assigned: [],
+          },
+          {
+            id: "tier-product",
+            number: 4,
+            type: "Product Match",
+            active: true,
+            usedBy: 0,
+            values: ["Featured products", "Retargeted products", "SKU family"],
+            assigned: [],
+          },
+          {
+            id: "tier-weather",
+            number: 5,
+            type: "Weather Targeting",
+            active: true,
+            usedBy: 0,
+            values: ["Rainy", "Sunny", "Cold"],
+            assigned: [],
+          },
+        ],
+      };
+
+      const tableHead = document.getElementById("tableHead");
+      const tableBody = document.getElementById("tableBody");
+      const tableColgroup = document.getElementById("tableColgroup");
+      const logicFilters = document.getElementById("logicFilters");
+      const searchInput = document.getElementById("searchInput");
+      const projectsPrototypeLink = document.getElementById("projectsPrototypeLink");
+      const addVariantButton = document.getElementById("addVariantButton");
+      const addVariantMenu = document.getElementById("addVariantMenu");
+      const columnButton = document.getElementById("columnButton");
+      const columnMenu = document.getElementById("columnMenu");
+      const hiddenColumnCount = document.getElementById("hiddenColumnCount");
+      const variantModal = document.getElementById("variantModal");
+      const variantBlocks = document.getElementById("variantBlocks");
+      const tierModal = document.getElementById("tierModal");
+      const mappingModal = document.getElementById("mappingModal");
+      const mappingForm = document.getElementById("mappingForm");
+      const confirmTypeModal = document.getElementById("confirmTypeModal");
+      const confirmDeleteModal = document.getElementById("confirmDeleteModal");
+      const confirmDeleteMessage = document.getElementById("confirmDeleteMessage");
+      const toast = document.getElementById("toast");
+      const producerMeta = document.getElementById("producerMeta");
+      const editPopover = document.getElementById("editPopover");
+      const connectorPopover = document.getElementById("connectorPopover");
+      const targetingPopover = document.getElementById("targetingPopover");
+      const logicTiers = document.getElementById("logicTiers");
+
+      function escapeHtml(value) {
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function chip(label, style = "gray") {
+        return `<span class="chip ${style}">${escapeHtml(label)}</span>`;
+      }
+
+      function visibleContentColumns() {
+        return contentColumns.filter((column) => !state.hiddenContentColumns.has(column.id));
+      }
+
+      function isPairVisible(pair) {
+        return !state.hiddenContentColumns.has(pair.from) && !state.hiddenContentColumns.has(pair.to);
+      }
+
+      function pairLabel(pair) {
+        const from = contentColumns.find((column) => column.id === pair.from).label;
+        const to = contentColumns.find((column) => column.id === pair.to).label;
+        return `${from} connected to ${to}`;
+      }
+
+      function assetMarkup(asset, fallback = "No asset") {
+        if (!asset) return `<span class="empty">${escapeHtml(fallback)}</span>`;
+        return `
+          <div class="asset">
+            <span class="asset-thumb ${escapeHtml(asset.thumb || "")}" aria-hidden="true">${asset.play ? "▶" : ""}</span>
+            <span class="asset-text">
+              <span class="asset-name">${escapeHtml(asset.name)}</span>
+              <span class="asset-sub">${escapeHtml(asset.sub || "Ready")}</span>
+            </span>
+          </div>
+        `;
+      }
+
+      function ruleLabelFromTierType(type) {
+        const labels = {
+          "Audience Targeting": "Audience targeting",
+          "Schedule Targeting": "Daypart targeting",
+          "Geo Targeting": "Geo targeting",
+          "Weather Targeting": "Weather targeting",
+          "Product Match": "Product match",
+        };
+        return labels[type] || type;
+      }
+
+      function tierTypeFromRuleLabel(label) {
+        const types = {
+          "Audience targeting": "Audience Targeting",
+          "Daypart targeting": "Schedule Targeting",
+          "Geo targeting": "Geo Targeting",
+          "Weather targeting": "Weather Targeting",
+          "Product match": "Product Match",
+        };
+        return types[label] || "";
+      }
+
+      function logicFromRuleLabel(label) {
+        if (label === "No targeting") return "No targeting";
+        if (label === "Fallback") return "Fallback";
+        return label;
+      }
+
+      function ruleChipStyle(label) {
+        return label === "No targeting" ? "gray" : "purple";
+      }
+
+      function uniqueValues(values) {
+        return Array.from(new Set(values.map((value) => String(value || "").trim()).filter(Boolean)));
+      }
+
+      function createDefaultScheduleConfig() {
+        const days = {};
+        weekDays.forEach((day) => {
+          days[day] = { enabled: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"].includes(day), ranges: [{ start: "09:00", end: "17:00" }], touched: false };
+        });
+        return {
+          ruleName: "Weekdays business hours",
+          condition: "Dayparting",
+          timezone: "Account timezone",
+          startDate: "",
+          endDate: "",
+          presets: ["Weekdays"],
+          customized: false,
+          scheduleSubmitted: false,
+          days,
+          values: ["Weekdays"],
+        };
+      }
+
+      function ensureScheduleTier(tier) {
+        if (!tier || tier.type !== "Schedule Targeting") return tier;
+        const defaults = createDefaultScheduleConfig();
+        tier.ruleName = tier.ruleName || "Schedule targeting rule";
+        tier.condition = tier.condition || defaults.condition;
+        tier.timezone = tier.timezone || defaults.timezone;
+        tier.startDate = tier.startDate || "";
+        tier.endDate = tier.endDate || "";
+        tier.presets = tier.presets || tier.values || [];
+        tier.days = tier.days || defaults.days;
+        tier.values = tier.presets.length ? tier.presets : tier.values || [];
+        return tier;
+      }
+
+      function scheduleTiers() {
+        return state.logicTiers.filter((tier) => tier.type === "Schedule Targeting").map(ensureScheduleTier);
+      }
+
+      function getScheduleTier(id) {
+        return scheduleTiers().find((tier) => tier.id === id);
+      }
+
+      function shortDate(value) {
+        if (!value) return "";
+        const date = new Date(`${value}T00:00:00`);
+        if (Number.isNaN(date.getTime())) return value;
+        return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      }
+
+      function scheduleDateSummary(tier) {
+        ensureScheduleTier(tier);
+        if (!tier.startDate || !tier.endDate) return "Date range incomplete";
+        return `Active from ${shortDate(tier.startDate)} to ${shortDate(tier.endDate)}`;
+      }
+
+      function enabledScheduleDays(tier) {
+        ensureScheduleTier(tier);
+        return weekDays.filter((day) => tier.days?.[day]?.enabled);
+      }
+
+      function scheduleRangeCount(tier) {
+        ensureScheduleTier(tier);
+        return weekDays.reduce((total, day) => {
+          const config = tier.days?.[day];
+          return total + (config?.enabled ? config.ranges.length : 0);
+        }, 0);
+      }
+
+      function scheduleSummary(tier) {
+        ensureScheduleTier(tier);
+        const dayCount = enabledScheduleDays(tier).length;
+        const rangeCount = scheduleRangeCount(tier);
+        const datePart = tier.startDate && tier.endDate ? `${shortDate(tier.startDate)}-${shortDate(tier.endDate)}` : "Date range incomplete";
+        if (!tier.customized && tier.presets?.length) {
+          return `${tier.presets.join(", ")} • ${datePart} • ${tier.timezone}`;
+        }
+        return `Custom schedule, ${dayCount} days, ${rangeCount} time ranges • ${datePart} • ${tier.timezone}`;
+      }
+
+      function conciseScheduleLabel(tier) {
+        ensureScheduleTier(tier);
+        if (tier.presets?.includes("Weekend") && tier.presets?.includes("Morning")) return "Weekend mornings";
+        if (tier.presets?.includes("Weekdays")) return "Weekdays business hours";
+        return tier.ruleName || "Schedule targeting";
+      }
+
+      function scheduleErrors(tier) {
+        ensureScheduleTier(tier);
+        const errors = { fields: {}, days: {} };
+        if (!tier.startDate) errors.fields.startDate = "Start date is required.";
+        if (!tier.endDate) errors.fields.endDate = "End date is required.";
+        if (tier.startDate && tier.endDate && tier.endDate < tier.startDate) errors.fields.endDate = "End date must be after the start date.";
+        weekDays.forEach((day) => {
+          const config = tier.days?.[day];
+          if (!config?.enabled) return;
+          const ranges = config.ranges || [];
+          ranges.forEach((range, index) => {
+            const key = `${day}-${index}`;
+            if (!range.start) errors.days[key] = "Start time is required.";
+            else if (!range.end) errors.days[key] = "End time is required.";
+            else if (range.end <= range.start) errors.days[key] = "End time must be after start time.";
+          });
+          const sorted = ranges
+            .map((range, index) => ({ ...range, index }))
+            .filter((range) => range.start && range.end)
+            .sort((a, b) => a.start.localeCompare(b.start));
+          for (let i = 1; i < sorted.length; i += 1) {
+            if (sorted[i].start < sorted[i - 1].end) errors.days[`${day}-${sorted[i].index}`] = "Time ranges cannot overlap.";
+          }
+        });
+        return errors;
+      }
+
+      function hasScheduleErrors(tier) {
+        const errors = scheduleErrors(tier);
+        return Boolean(Object.keys(errors.fields).length || Object.keys(errors.days).length);
+      }
+
+      function matchingTiers(ruleLabel) {
+        const type = tierTypeFromRuleLabel(ruleLabel);
+        return state.logicTiers.filter((tier) => tier.active && tier.type === type);
+      }
+
+      function ruleOptionsForTable() {
+        const configured = state.logicTiers.filter((tier) => tier.active).map((tier) => ruleLabelFromTierType(tier.type));
+        const order = ["Audience targeting", "Daypart targeting", "Geo targeting", "Weather targeting", "Product match"];
+        return [...order.filter((label) => configured.includes(label)), "No targeting"];
+      }
+
+      function fallbackValuesForRule(ruleLabel) {
+        const values = {
+          "Audience targeting": ["High-value shoppers", "Lapsed buyers", "Students", "Prospecting broad", "Weekend travelers", "New audience segment", "Movie Lovers"],
+          "Daypart targeting": ["Weekdays", "Weekend", "Evening"],
+          "Geo targeting": ["London", "Manchester", "Birmingham"],
+          "Weather targeting": ["Rainy", "Sunny", "Cold"],
+          "Product match": ["Featured products", "Retargeted products", "SKU family"],
+        };
+        return values[ruleLabel] || [];
+      }
+
+      function filterValuesForRule(ruleLabel) {
+        if (ruleLabel === "No targeting") return [];
+        const values = [];
+        matchingTiers(ruleLabel).forEach((tier) => {
+          if (tier.type === "Audience Targeting") {
+            values.push(tier.segmentName);
+            (tier.mappings || []).forEach((mapping) => values.push(mapping.displayName));
+          } else if (tier.type === "Schedule Targeting") {
+            ensureScheduleTier(tier);
+            values.push(...(tier.presets || []), ...(tier.values || []));
+          } else {
+            values.push(...(tier.values || []));
+          }
+        });
+        state.variants.forEach((variant) => {
+          if (variant.targeting.rule === ruleLabel) values.push(...variant.targeting.filters);
+        });
+        return uniqueValues([...values, ...fallbackValuesForRule(ruleLabel)]);
+      }
+
+      function syncTierUsage() {
+        state.logicTiers.forEach((tier) => {
+          if (tier.type === "Schedule Targeting") {
+            const assigned = state.variants.filter((variant) => variant.scheduleId === tier.id).map((variant) => variant.name);
+            tier.usedBy = assigned.length;
+            tier.assigned = assigned;
+            return;
+          }
+          const label = ruleLabelFromTierType(tier.type);
+          const assigned = state.variants.filter((variant) => variant.targeting.rule === label).map((variant) => variant.name);
+          tier.usedBy = assigned.length;
+          if (tier.type !== "Audience Targeting") tier.assigned = assigned;
+        });
+      }
+
+      function renderTabs() {
+        document.querySelectorAll("[data-tab]").forEach((tab) => {
+          tab.classList.toggle("active", tab.dataset.tab === state.activeTab);
+        });
+        document.getElementById("tableView").hidden = state.activeTab !== "table";
+        document.getElementById("previewView").hidden = state.activeTab !== "preview";
+        document.getElementById("logicView").hidden = state.activeTab !== "logic";
+        document.getElementById("filtersBand").hidden = state.activeTab !== "table";
+      }
+
+      function renderMeta() {
+        producerMeta.innerHTML = `${state.totalCreatives} creatives in total (${state.approvedCreatives} approved) &bull; 1 day ago`;
+      }
+
+      function renderColumnMenu() {
+        hiddenColumnCount.textContent = state.hiddenContentColumns.size;
+        columnMenu.innerHTML = `
+          <div class="column-menu-title">Content columns</div>
+          ${contentColumns
+            .map(
+              (column) => `
+                <label class="column-option">
+                  <input type="checkbox" data-column-toggle="${column.id}" ${state.hiddenContentColumns.has(column.id) ? "" : "checked"} />
+                  <span>${escapeHtml(column.label)}</span>
+                </label>
+              `
+            )
+            .join("")}
+          <div class="helper" style="padding: 6px 10px 10px">Saved connections reappear when both connected columns are visible.</div>
+        `;
+      }
+
+      function renderColgroup() {
+        const fixed = [420, 160, 330, 180, 230, 240, 120, 135, 190];
+        tableColgroup.innerHTML =
+          fixed.map((width) => `<col style="width: ${width}px" />`).join("") +
+          visibleContentColumns().map((column) => `<col style="width: ${column.width}px" />`).join("");
+      }
+
+      function renderHeader() {
+        const subHeaders = ["Publishing", "Creative name", "Rule", "Filter", "Schedule", "Platform", "Ad Type", "Launch readiness"];
+        const visibleContent = visibleContentColumns();
+        const contentSubHeaders = visibleContent
+          .map((column) => {
+            const pairEndingHere = contentPairs.find((pair) => pair.to === column.id && isPairVisible(pair));
+            const pairStartingHere = contentPairs.find((pair) => pair.from === column.id && isPairVisible(pair));
+            const connectedLeft = pairStartingHere && state.connections[pairStartingHere.id];
+            const connectedRight = pairEndingHere && state.connections[pairEndingHere.id];
+            const slot = pairEndingHere
+              ? `<button class="connector-slot ${state.connections[pairEndingHere.id] ? "connected" : ""}" type="button" data-connector="${pairEndingHere.id}" title="${state.connections[pairEndingHere.id] ? escapeHtml(pairLabel(pairEndingHere)) : `Connect ${escapeHtml(pairEndingHere.from)} to ${escapeHtml(pairEndingHere.to)}`}" aria-label="${state.connections[pairEndingHere.id] ? escapeHtml(pairLabel(pairEndingHere)) : `Connect ${escapeHtml(pairEndingHere.from)} to ${escapeHtml(pairEndingHere.to)}`}">↔</button>`
+              : "";
+            return `
+              <th class="sub-head content-head ${connectedLeft ? "connected-left" : ""} ${connectedRight ? "connected-right" : ""}" data-column="${column.id}">
+                ${slot}
+                <span class="truncate">${escapeHtml(column.label)}</span>
+              </th>
+            `;
+          })
+          .join("");
+
+        tableHead.innerHTML = `
+          <tr>
+            <th class="variant-head" rowspan="2">
+              <div class="variant-header-line">
+                <label class="variant-main">
+                  <input class="checkbox" type="checkbox" aria-label="Select all visible variants" />
+                  <span>Variant name</span>
+                </label>
+                <span aria-hidden="true">▤</span>
+              </div>
+            </th>
+            <th class="group-head" colspan="2">Activations</th>
+            <th class="group-head" colspan="3">Targeting</th>
+            <th class="group-head" colspan="2">Platform</th>
+            <th class="group-head" colspan="1">Quality</th>
+            <th class="group-head" colspan="${visibleContent.length || 1}">Content <span title="Content elements can be connected">ⓘ</span></th>
+          </tr>
+          <tr>
+            ${subHeaders.map((label) => `<th class="sub-head">${escapeHtml(label)}</th>`).join("")}
+            ${contentSubHeaders || '<th class="sub-head">No content columns visible</th>'}
+          </tr>
+        `;
+      }
+
+      function visibleVariants() {
+        const search = state.search.trim().toLowerCase();
+        return state.variants.filter((variant) => {
+          const matchesLogic = state.activeLogic === "All" || variant.logic === state.activeLogic;
+          const matchesSearch =
+            !search ||
+            [
+              variant.name,
+              variant.creativeName,
+              variant.targeting.rule,
+              ...variant.targeting.filters,
+              getScheduleTier(variant.scheduleId)?.ruleName,
+              getScheduleTier(variant.scheduleId) ? scheduleSummary(getScheduleTier(variant.scheduleId)) : "",
+              variant.content.headline,
+              variant.content.cta,
+              variant.content.image?.name,
+              variant.content.video?.name,
+            ]
+              .filter(Boolean)
+              .some((value) => value.toLowerCase().includes(search));
+          return matchesLogic && matchesSearch;
+        });
+      }
+
+      function renderFilters() {
+        const counts = state.variants.reduce(
+          (acc, variant) => {
+            acc.All += 1;
+            acc[variant.logic] = (acc[variant.logic] || 0) + 1;
+            return acc;
+          },
+          { All: 0 }
+        );
+        const baseFilters = ["Audience targeting", "Daypart targeting", "Geo targeting", "Weather targeting", "Product match", "Fallback", "No targeting"];
+        const filters = ["All", ...baseFilters.filter((filter) => (counts[filter] || 0) > 0 || ["Audience targeting", "Daypart targeting", "No targeting"].includes(filter))];
+        logicFilters.innerHTML = `
+          <span class="filters-label">Logic filter</span>
+          ${filters
+            .map(
+              (filter) => `
+                <button class="filter-chip ${state.activeLogic === filter ? "active" : ""}" type="button" data-filter="${escapeHtml(filter)}">
+                  ${escapeHtml(filter)}
+                  <span class="count-badge">${counts[filter] || 0}</span>
+                </button>
+              `
+            )
+            .join("")}
+        `;
+      }
+
+      function editButton(variant, field, label) {
+        return `<button class="edit-pencil" type="button" title="Edit" aria-label="Edit ${escapeHtml(label)}" data-edit-field="${field}" data-variant="${variant.id}">✎</button>`;
+      }
+
+      function editableTd(variant, field, label, content) {
+        return `
+          <td class="editable-td" data-edit-cell data-edit-field="${field}" data-variant="${variant.id}" aria-label="Edit ${escapeHtml(label)}">
+            <div class="cell-content">${content}</div>
+            ${editButton(variant, field, label)}
+          </td>
+        `;
+      }
+
+      function filterSummary(filters) {
+        if (!filters.length) return '<span class="filter-placeholder">Select values</span>';
+        const [first, ...rest] = filters;
+        return chip(rest.length ? `${first} +${rest.length}` : first, "gray");
+      }
+
+      function renderRuleCell(variant) {
+        return `
+          <td class="targeting-td">
+            <button class="rule-control" type="button" data-rule-button="${variant.id}" aria-label="Select rule for ${escapeHtml(variant.name)}">
+              ${chip(variant.targeting.rule, ruleChipStyle(variant.targeting.rule))}
+              <span class="select-arrow" aria-hidden="true">⌄</span>
+            </button>
+          </td>
+        `;
+      }
+
+      function renderFilterCell(variant) {
+        const disabled = variant.targeting.rule === "No targeting";
+        return `
+          <td class="targeting-td">
+            <button class="filter-control" type="button" data-filter-button="${variant.id}" ${disabled ? "disabled" : ""} aria-label="Select filter values for ${escapeHtml(variant.name)}">
+              <span class="cell-content">${disabled ? '<span class="empty">No rule</span>' : filterSummary(variant.targeting.filters)}</span>
+              ${disabled ? "" : '<span class="add-square" aria-hidden="true">+</span>'}
+            </button>
+          </td>
+        `;
+      }
+
+      function renderScheduleCell(variant) {
+        const schedules = scheduleTiers();
+        if (!schedules.length) {
+          return `
+            <td class="targeting-td">
+              <div class="schedule-empty">
+                <span class="empty">No schedules created</span>
+                <button class="text-button" type="button" data-create-schedule-from-table>Create schedule rule</button>
+              </div>
+            </td>
+          `;
+        }
+        const selected = getScheduleTier(variant.scheduleId);
+        return `
+          <td class="targeting-td">
+            <select class="schedule-select" data-schedule-select="${variant.id}" title="${selected ? escapeHtml(scheduleSummary(selected)) : "Select schedule"}" aria-label="Select schedule for ${escapeHtml(variant.name)}">
+              <option value="">Select schedule</option>
+              ${schedules
+                .map(
+                  (tier) => `
+                    <option value="${escapeHtml(tier.id)}" ${variant.scheduleId === tier.id ? "selected" : ""}>${escapeHtml(conciseScheduleLabel(tier))}</option>
+                  `
+                )
+                .join("")}
+            </select>
+          </td>
+        `;
+      }
+
+      function renderVariantCell(variant) {
+        return `
+          <td class="variant-cell editable-td">
+            <div class="variant-main">
+              <input class="checkbox" type="checkbox" aria-label="Select ${escapeHtml(variant.name)}" />
+              <button class="chevron" type="button" data-expand="${variant.id}" aria-label="Toggle ${escapeHtml(variant.name)}">${variant.expanded ? "⌄" : "›"}</button>
+              <button class="toggle ${variant.enabled ? "on" : ""}" type="button" data-toggle="${variant.id}" aria-label="Toggle ${escapeHtml(variant.name)}"></button>
+              <div class="variant-text">
+                <div class="variant-name">${escapeHtml(variant.name)}</div>
+              </div>
+              <button class="row-menu" type="button" aria-label="More actions">⋮</button>
+            </div>
+            <div class="variant-subline">${variant.status.map((status, index) => chip(status, variant.statusStyles[index])).join("")}</div>
+          </td>
+        `;
+      }
+
+      function renderCreativeName(variant) {
+        const preview = resolveMacro(variant.creativeName, variant).value;
+        return `
+          <div class="truncate">${escapeHtml(preview)}</div>
+          ${variant.creativeName.includes("{{") ? '<div><span class="mono">{{variant_name}}</span> <span class="mono">{{platform}}</span> <span class="mono">{{format}}</span></div>' : ""}
+        `;
+      }
+
+      function renderContentCell(variant, columnId) {
+        if (columnId === "headline") return `<span class="truncate">${escapeHtml(variant.content.headline)}</span>`;
+        if (columnId === "cta") return `<span class="truncate">${escapeHtml(variant.content.cta)}</span>`;
+        if (columnId === "image") return assetMarkup(variant.content.image);
+        return assetMarkup(variant.content.video);
+      }
+
+      function renderRows() {
+        const rows = visibleVariants();
+        tableBody.innerHTML = rows
+          .map((variant, index) => {
+            const contentCells = visibleContentColumns()
+              .map((column) => editableTd(variant, column.id, column.label, renderContentCell(variant, column.id)))
+              .join("");
+            const mainRow = `
+              <tr class="${index === 0 ? "selected-row" : ""}">
+                ${renderVariantCell(variant)}
+                <td><div class="cell-stack">${variant.publishing.map((item) => chip(item.label, item.style)).join("")}</div></td>
+                ${editableTd(variant, "creativeName", "Creative name", renderCreativeName(variant))}
+                ${renderRuleCell(variant)}
+                ${renderFilterCell(variant)}
+                ${renderScheduleCell(variant)}
+                ${editableTd(variant, "platform", "Platform", `<div class="chip-row">${variant.platforms.map((item) => chip(item, "purple")).join("")}</div>`)}
+                ${editableTd(variant, "adType", "Ad Type", `<div class="chip-row">${variant.adTypes.map((item) => chip(item, "gray")).join("")}</div>`)}
+                ${editableTd(variant, "quality", "Launch readiness", `<div class="chip-row">${variant.quality.map((item) => chip(item.label, item.style)).join("")}</div>`)}
+                ${contentCells}
+              </tr>
+            `;
+            const childRows = variant.expanded
+              ? variant.formats
+                  .map(
+                    (format) => `
+                      <tr class="child-row">
+                        <td class="variant-cell">
+                          <div class="variant-main" style="padding-left: 72px">
+                            <button class="toggle on" type="button" aria-label="Toggle ${escapeHtml(format.name)}"></button>
+                            <div class="variant-text">
+                              <div class="variant-name">${escapeHtml(format.name)}</div>
+                              <div class="asset-sub">${escapeHtml(format.source)}</div>
+                            </div>
+                          </div>
+                          <div class="variant-subline" style="margin-left: 120px">${chip("Approved", "green")}${chip(format.combinations, "gray")}</div>
+                        </td>
+                        <td>${chip(format.publishing, "green")}</td>
+                        ${editableTd(variant, "creativeName", "Creative name", renderCreativeName(variant))}
+                        ${renderRuleCell(variant)}
+                        ${renderFilterCell(variant)}
+                        ${renderScheduleCell(variant)}
+                        ${editableTd(variant, "platform", "Platform", `<div class="chip-row">${variant.platforms.map((item) => chip(item, "purple")).join("")}</div>`)}
+                        ${editableTd(variant, "adType", "Ad Type", `<div class="chip-row">${variant.adTypes.slice(0, 1).map((item) => chip(item, "gray")).join("")}</div>`)}
+                        ${editableTd(variant, "quality", "Launch readiness", chip("Ready", "green"))}
+                        ${visibleContentColumns().map((column) => editableTd(variant, column.id, column.label, renderContentCell(variant, column.id))).join("")}
+                      </tr>
+                    `
+                  )
+                  .join("")
+              : "";
+            return mainRow + childRows;
+          })
+          .join("");
+      }
+
+      function renderTable() {
+        renderColgroup();
+        renderHeader();
+        renderFilters();
+        renderRows();
+        renderColumnMenu();
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        window.clearTimeout(showToast.timer);
+        showToast.timer = window.setTimeout(() => toast.classList.remove("show"), 2600);
+      }
+
+      function resolveMacro(template, variant) {
+        const macros = {
+          headline: variant.content.headline,
+          cta: variant.content.cta,
+          image: variant.content.image?.name || "",
+          video: variant.content.video?.name || "",
+          variant_name: variant.name,
+          platform: variant.platforms[0] || "",
+          format: variant.formats[0]?.name || "728x90",
+          ad_type: variant.adTypes[0] || "",
+        };
+        let unknown = "";
+        const value = String(template || "").replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (match, key) => {
+          if (!supportedMacros.includes(key)) {
+            unknown = key;
+            return match;
+          }
+          return macros[key] ?? "";
+        });
+        return { value, unknown };
+      }
+
+      function getFieldValue(variant, field) {
+        if (field === "creativeName") return variant.creativeName;
+        if (field === "rule") return variant.targeting.rule;
+        if (field === "filter") return variant.targeting.filters.join(", ");
+        if (field === "platform") return variant.platforms.join(", ");
+        if (field === "adType") return variant.adTypes.join(", ");
+        if (field === "quality") return variant.quality.map((item) => item.label).join(", ");
+        if (field === "headline") return variant.templates?.headline || variant.content.headline;
+        if (field === "cta") return variant.templates?.cta || variant.content.cta;
+        if (field === "image") return variant.templates?.image || "{{image}}";
+        if (field === "video") return variant.templates?.video || "{{video}}";
+        return "";
+      }
+
+      function fieldLabel(field) {
+        const labels = {
+          creativeName: "Creative name",
+          rule: "Rule",
+          filter: "Filter",
+          platform: "Platform",
+          adType: "Ad Type",
+          quality: "Launch readiness",
+          headline: "Headline",
+          cta: "CTA",
+          image: "Image",
+          video: "Video",
+        };
+        return labels[field] || field;
+      }
+
+      function currentResolvedValue(variant, field) {
+        if (field === "image") return variant.content.image?.name || "No asset";
+        if (field === "video") return variant.content.video?.name || "No asset";
+        if (field === "headline") return variant.content.headline;
+        if (field === "cta") return variant.content.cta;
+        return resolveMacro(getFieldValue(variant, field), variant).value || getFieldValue(variant, field);
+      }
+
+      function openEditPopover(button) {
+        const variant = state.variants.find((item) => item.id === button.dataset.variant);
+        if (!variant) return;
+        const field = button.dataset.editField;
+        const value = getFieldValue(variant, field);
+        state.editing = {
+          trigger: button,
+          variantId: variant.id,
+          field,
+          value,
+          selectedAsset: field === "image" ? variant.content.image?.name || "" : field === "video" ? variant.content.video?.name || "" : "",
+          submitted: false,
+          error: "",
+        };
+        renderEditPopover();
+        placePopover(editPopover, button, field === "image" || field === "video");
+        const focusTarget = editPopover.querySelector("textarea, input, select, button");
+        if (focusTarget) focusTarget.focus();
+      }
+
+      function renderEditPopover() {
+        if (!state.editing) return;
+        const variant = state.variants.find((item) => item.id === state.editing.variantId);
+        const field = state.editing.field;
+        const label = fieldLabel(field);
+        const isAsset = field === "image" || field === "video";
+        const isMacro = ["creativeName", "headline", "cta", "image", "video"].includes(field);
+        const resolved = resolveMacro(state.editing.value, variant);
+        const preview = isAsset ? state.editing.selectedAsset || "No asset" : resolved.value;
+        editPopover.className = `popover show ${isAsset ? "wide" : ""}`;
+        editPopover.innerHTML = `
+          <div class="popover-title">Edit ${escapeHtml(label)}</div>
+          <div class="section-label">Current value</div>
+          <div class="readonly-box">${escapeHtml(currentResolvedValue(variant, field))}</div>
+          ${
+            isAsset
+              ? renderAssetEditor(field)
+              : renderScalarEditor(field, state.editing.value)
+          }
+          ${
+            isMacro
+              ? `
+                <div class="field" style="margin-bottom: 8px">
+                  <label for="macroInput">Editable macro template</label>
+                  <textarea id="macroInput" data-edit-value>${escapeHtml(state.editing.value)}</textarea>
+                </div>
+                <div class="helper">Supported macros: ${supportedMacros.map((macro) => `{{${macro}}}`).join(", ")}</div>
+              `
+              : ""
+          }
+          <div class="section-label" style="margin-top: 10px">Preview</div>
+          <div class="preview-box">${escapeHtml(preview)}</div>
+          <div class="error">${escapeHtml(state.editing.error || "")}</div>
+          <div class="popover-actions">
+            <button class="ghost-button" type="button" data-edit-cancel>Cancel</button>
+            <button class="primary-button" type="button" data-edit-save>Save</button>
+          </div>
+        `;
+      }
+
+      function renderScalarEditor(field, value) {
+        if (["creativeName", "headline", "cta"].includes(field)) return "";
+        if (field === "rule") {
+          const options = ruleOptionsForTable();
+          return `
+            <div class="field">
+              <label for="scalarInput">Editable field</label>
+              <select id="scalarInput" data-edit-value>${options.map((option) => `<option ${value === option ? "selected" : ""}>${escapeHtml(option)}</option>`).join("")}</select>
+            </div>
+          `;
+        }
+        return `
+          <div class="field">
+            <label for="scalarInput">Editable field</label>
+            <input id="scalarInput" data-edit-value type="text" value="${escapeHtml(value)}" />
+          </div>
+        `;
+      }
+
+      function renderAssetEditor(field) {
+        const assets = field === "image" ? imageAssets : videoAssets;
+        return `
+          <div class="section-label">Asset selection</div>
+          <div class="asset-list">
+            <button class="asset-option ${!state.editing.selectedAsset ? "selected" : ""}" type="button" data-asset="">
+              <span class="asset-thumb" aria-hidden="true"></span>
+              <span><span class="asset-name">No asset</span><span class="asset-sub">Neutral empty state</span></span>
+            </button>
+            ${assets
+              .map(
+                (asset) => `
+                  <button class="asset-option ${state.editing.selectedAsset === asset.name ? "selected" : ""}" type="button" data-asset="${escapeHtml(asset.name)}">
+                    <span class="asset-thumb ${escapeHtml(asset.thumb)}" aria-hidden="true">${asset.play ? "▶" : ""}</span>
+                    <span><span class="asset-name">${escapeHtml(asset.name)}</span><span class="asset-sub">${escapeHtml(asset.sub)}</span></span>
+                  </button>
+                `
+              )
+              .join("")}
+          </div>
+        `;
+      }
+
+      function placePopover(popover, trigger, wide = false) {
+        const rect = trigger.getBoundingClientRect();
+        const width = wide ? 520 : 380;
+        popover.style.left = `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`;
+        popover.style.top = `${Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - 420))}px`;
+      }
+
+      function placePopoverAtRect(popover, rect, width = 380) {
+        popover.style.left = `${Math.max(12, Math.min(rect.left, window.innerWidth - width - 12))}px`;
+        popover.style.top = `${Math.max(12, Math.min(rect.bottom + 8, window.innerHeight - 420))}px`;
+      }
+
+      function updateEditingValue(target) {
+        if (!state.editing) return;
+        if (target.matches("[data-asset]")) {
+          state.editing.selectedAsset = target.dataset.asset;
+          if (state.editing.field === "image") state.editing.value = "{{image}}";
+          if (state.editing.field === "video") state.editing.value = "{{video}}";
+          renderEditPopover();
+          placePopover(editPopover, state.editing.trigger, true);
+          return;
+        }
+        if (target.matches("[data-edit-value]")) {
+          state.editing.value = target.value;
+          state.editing.error = "";
+          renderEditPopover();
+          placePopover(editPopover, state.editing.trigger, state.editing.field === "image" || state.editing.field === "video");
+          const input = editPopover.querySelector("[data-edit-value]");
+          if (input) {
+            input.focus();
+            if (input.setSelectionRange) input.setSelectionRange(input.value.length, input.value.length);
+          }
+        }
+      }
+
+      function saveEdit() {
+        if (!state.editing) return;
+        const variant = state.variants.find((item) => item.id === state.editing.variantId);
+        if (!variant) return;
+        const field = state.editing.field;
+        const value = String(state.editing.value || "").trim();
+        const required = ["creativeName", "rule", "headline", "cta"].includes(field);
+        const macro = resolveMacro(value, variant);
+
+        if (required && !value) {
+          state.editing.error = "This field is required.";
+          renderEditPopover();
+          placePopover(editPopover, state.editing.trigger);
+          return;
+        }
+        if (macro.unknown) {
+          state.editing.error = "Unknown macro. Choose from supported macros.";
+          renderEditPopover();
+          placePopover(editPopover, state.editing.trigger, field === "image" || field === "video");
+          return;
+        }
+
+        variant.templates = variant.templates || {};
+        if (field === "creativeName") {
+          variant.creativeName = value;
+          variant.templates.creativeName = value;
+        } else if (field === "headline") {
+          variant.templates.headline = value;
+          variant.content.headline = macro.value;
+        } else if (field === "cta") {
+          variant.templates.cta = value;
+          variant.content.cta = macro.value;
+        } else if (field === "image") {
+          variant.templates.image = value || "{{image}}";
+          variant.content.image = imageAssets.find((asset) => asset.name === state.editing.selectedAsset) || null;
+        } else if (field === "video") {
+          variant.templates.video = value || "{{video}}";
+          variant.content.video = videoAssets.find((asset) => asset.name === state.editing.selectedAsset) || null;
+        } else if (field === "rule") {
+          variant.targeting.rule = value;
+          variant.targeting.filters = [];
+          variant.logic = logicFromRuleLabel(value);
+        } else if (field === "filter") {
+          variant.targeting.filters = value.split(",").map((item) => item.trim()).filter(Boolean);
+        } else if (field === "platform") {
+          variant.platforms = value.split(",").map((item) => item.trim()).filter(Boolean);
+        } else if (field === "adType") {
+          variant.adTypes = value.split(",").map((item) => item.trim()).filter(Boolean);
+        } else if (field === "quality") {
+          variant.quality = value.split(",").map((item) => ({ label: item.trim(), style: item.toLowerCase().includes("fix") ? "yellow" : item.toLowerCase().includes("ready") ? "green" : "gray" })).filter((item) => item.label);
+        }
+
+        closeEditPopover(true);
+        renderTable();
+        showToast("Cell updated.");
+      }
+
+      function closeEditPopover(returnFocus = false) {
+        const trigger = state.editing?.trigger;
+        state.editing = null;
+        editPopover.className = "popover";
+        editPopover.innerHTML = "";
+        if (returnFocus && trigger) trigger.focus();
+      }
+
+      function openRulePopover(button) {
+        const variant = state.variants.find((item) => item.id === button.dataset.ruleButton);
+        if (!variant) return;
+        state.targeting = {
+          mode: "rule",
+          variantId: variant.id,
+          triggerSelector: `[data-rule-button="${variant.id}"]`,
+          rect: button.getBoundingClientRect(),
+          search: "",
+        };
+        renderTargetingPopover();
+      }
+
+      function openFilterPopover(button) {
+        const variant = state.variants.find((item) => item.id === button.dataset.filterButton);
+        if (!variant || variant.targeting.rule === "No targeting") return;
+        state.targeting = {
+          mode: "filter",
+          variantId: variant.id,
+          triggerSelector: `[data-filter-button="${variant.id}"]`,
+          rect: button.getBoundingClientRect(),
+          search: "",
+        };
+        renderTargetingPopover();
+      }
+
+      function renderTargetingPopover() {
+        if (!state.targeting) return;
+        const variant = state.variants.find((item) => item.id === state.targeting.variantId);
+        if (!variant) return;
+
+        if (state.targeting.mode === "rule") {
+          const options = uniqueValues([...ruleOptionsForTable(), variant.targeting.rule]);
+          targetingPopover.className = "popover targeting-popover show";
+          targetingPopover.innerHTML = `
+            <div class="popover-headline">
+              <div class="popover-title">Rule</div>
+              <button class="text-button" type="button" data-targeting-cancel>Cancel</button>
+            </div>
+            <div class="helper" style="margin-bottom: 10px">Choose a logic tier for this variant.</div>
+            <div class="rule-list">
+              ${options
+                .map(
+                  (option) => `
+                    <button class="rule-option-button ${variant.targeting.rule === option ? "selected" : ""}" type="button" data-rule-option="${escapeHtml(option)}">
+                      <span>${chip(option, ruleChipStyle(option))}</span>
+                      <span class="asset-sub">${option === "No targeting" ? "No filters" : `${filterValuesForRule(option).length} values`}</span>
+                    </button>
+                  `
+                )
+                .join("")}
+            </div>
+          `;
+          placePopoverAtRect(targetingPopover, state.targeting.rect, 360);
+        } else {
+          const query = state.targeting.search.trim().toLowerCase();
+          const values = filterValuesForRule(variant.targeting.rule).filter((value) => value.toLowerCase().includes(query));
+          const selected = new Set(variant.targeting.filters);
+          const openLabel = variant.targeting.rule === "Audience targeting" ? "Open audience rule" : "Open logic";
+          targetingPopover.className = "popover targeting-popover wide show";
+          targetingPopover.innerHTML = `
+            <div class="popover-headline">
+              <div class="popover-title">Filter values</div>
+              <button class="text-button" type="button" data-clear-filter>Clear all</button>
+            </div>
+            <div class="helper" style="margin-bottom: 10px">Filter this variant to one or more values from ${escapeHtml(variant.targeting.rule)}.</div>
+            <label class="value-search" aria-label="Search filter values">
+              <input type="search" data-filter-search placeholder="Search filter values..." value="${escapeHtml(state.targeting.search)}" />
+            </label>
+            <div class="value-list">
+              ${
+                values.length
+                  ? values
+                      .map(
+                        (value) => `
+                          <button class="value-option-button ${selected.has(value) ? "selected" : ""}" type="button" data-filter-value="${escapeHtml(value)}">
+                            <span>${escapeHtml(value)}</span>
+                            <span>${selected.has(value) ? "✓" : ""}</span>
+                          </button>
+                        `
+                      )
+                      .join("")
+                  : '<div class="readonly-box">No matching values.</div>'
+              }
+            </div>
+            <div class="popover-footer-link">
+              <button class="text-button" type="button" data-open-logic>${escapeHtml(openLabel)}</button>
+            </div>
+          `;
+          placePopoverAtRect(targetingPopover, state.targeting.rect, 390);
+        }
+
+        const focusTarget = targetingPopover.querySelector("input, button");
+        if (focusTarget) focusTarget.focus();
+      }
+
+      function closeTargetingPopover(returnFocus = false) {
+        const triggerSelector = state.targeting?.triggerSelector;
+        state.targeting = null;
+        targetingPopover.className = "popover targeting-popover";
+        targetingPopover.innerHTML = "";
+        if (returnFocus && triggerSelector) {
+          const trigger = document.querySelector(triggerSelector);
+          if (trigger) trigger.focus();
+        }
+      }
+
+      function selectRuleForVariant(ruleLabel) {
+        if (!state.targeting) return;
+        const variant = state.variants.find((item) => item.id === state.targeting.variantId);
+        if (!variant) return;
+        variant.targeting.rule = ruleLabel;
+        variant.targeting.filters = [];
+        variant.logic = logicFromRuleLabel(ruleLabel);
+        closeTargetingPopover(true);
+        render();
+        showToast(ruleLabel === "No targeting" ? "Rule cleared." : "Rule updated.");
+      }
+
+      function toggleFilterValue(value) {
+        if (!state.targeting) return;
+        const variant = state.variants.find((item) => item.id === state.targeting.variantId);
+        if (!variant) return;
+        const selected = new Set(variant.targeting.filters);
+        if (selected.has(value)) selected.delete(value);
+        else selected.add(value);
+        variant.targeting.filters = Array.from(selected);
+        renderTable();
+        renderLogic();
+        renderTargetingPopover();
+      }
+
+      function clearFilterValues() {
+        if (!state.targeting) return;
+        const variant = state.variants.find((item) => item.id === state.targeting.variantId);
+        if (!variant) return;
+        variant.targeting.filters = [];
+        renderTable();
+        renderLogic();
+        renderTargetingPopover();
+      }
+
+      function openLogicFromTargeting() {
+        closeTargetingPopover();
+        state.activeTab = "logic";
+        renderTabs();
+        renderLogic();
+      }
+
+      function openConnectorPopover(button) {
+        const pair = contentPairs.find((item) => item.id === button.dataset.connector);
+        if (!pair) return;
+        if (!state.connections[pair.id]) {
+          state.connections[pair.id] = true;
+          renderTable();
+          showToast(pairLabel(pair) + ".");
+          button.focus();
+          return;
+        }
+        state.connector = { trigger: button, pairId: pair.id };
+        connectorPopover.className = "popover connector-popover show";
+        connectorPopover.innerHTML = `
+          <div class="popover-title">Connected elements: ${escapeHtml(contentColumns.find((column) => column.id === pair.from).label)} ↔ ${escapeHtml(contentColumns.find((column) => column.id === pair.to).label)}</div>
+          <div class="popover-actions">
+            <button class="ghost-button" type="button" data-connector-cancel>Cancel</button>
+            <button class="primary-button" type="button" data-connector-disconnect>Disconnect</button>
+          </div>
+        `;
+        placePopover(connectorPopover, button);
+        connectorPopover.querySelector("button").focus();
+      }
+
+      function closeConnectorPopover(returnFocus = false) {
+        const trigger = state.connector?.trigger;
+        state.connector = null;
+        connectorPopover.className = "popover connector-popover";
+        connectorPopover.innerHTML = "";
+        if (returnFocus && trigger) trigger.focus();
+      }
+
+      function disconnectPair() {
+        if (!state.connector) return;
+        state.connections[state.connector.pairId] = false;
+        closeConnectorPopover(true);
+        renderTable();
+        showToast("Connection removed.");
+      }
+
+      function openVariantModal() {
+        state.modalBlocks = [newBlock()];
+        state.submitted = false;
+        variantModal.hidden = false;
+        renderVariantModal();
+        const input = variantModal.querySelector("input[data-field='name']");
+        if (input) input.focus();
+      }
+
+      function closeVariantModal() {
+        variantModal.hidden = true;
+      }
+
+      function newBlock() {
+        return {
+          id:
+            globalThis.crypto && typeof globalThis.crypto.randomUUID === "function"
+              ? globalThis.crypto.randomUUID()
+              : String(Date.now() + Math.random()),
+          name: "",
+          method: "default",
+          sourceId: "",
+        };
+      }
+
+      function renderVariantModal() {
+        variantBlocks.innerHTML = state.modalBlocks
+          .map((block, index) => {
+            const nameError = state.submitted && !block.name.trim();
+            const sourceError = state.submitted && block.method === "duplicate" && !block.sourceId;
+            return `
+              <section class="variant-block" data-block="${block.id}">
+                <div class="variant-block-title">Variant ${index + 1}</div>
+                <div class="field">
+                  <label for="variant-name-${block.id}">Variant name</label>
+                  <input id="variant-name-${block.id}" class="${nameError ? "invalid" : ""}" type="text" data-block="${block.id}" data-field="name" value="${escapeHtml(block.name)}" placeholder="e.g. Prospecting Pilot Launch - Mobile" />
+                  <div class="error">${nameError ? "Variant name is required." : ""}</div>
+                </div>
+                <div class="method-title">Setup method</div>
+                <div class="radio-stack">
+                  <label class="radio-row"><input type="radio" name="method-${block.id}" value="default" data-block="${block.id}" data-field="method" ${block.method === "default" ? "checked" : ""} /> Use default values</label>
+                  ${block.method === "default" ? '<div class="helper" style="margin-left: 28px">Starts with the current template structure and default content values.</div>' : ""}
+                  <label class="radio-row"><input type="radio" name="method-${block.id}" value="duplicate" data-block="${block.id}" data-field="method" ${block.method === "duplicate" ? "checked" : ""} /> Duplicate an existing variant</label>
+                  ${
+                    block.method === "duplicate"
+                      ? `
+                        <div class="duplicate-fields">
+                          <div class="field">
+                            <label for="duplicate-${block.id}">Duplicate from</label>
+                            <select id="duplicate-${block.id}" class="${sourceError ? "invalid" : ""}" data-block="${block.id}" data-field="sourceId">
+                              <option value="">Select a source variant</option>
+                              ${state.variants.map((variant) => `<option value="${escapeHtml(variant.id)}" ${block.sourceId === variant.id ? "selected" : ""}>${escapeHtml(variant.name)}</option>`).join("")}
+                            </select>
+                            <div class="error">${sourceError ? "Source variant is required." : ""}</div>
+                          </div>
+                          <div class="helper" style="margin-left: 0">Copies content, assets, targeting, and connected elements from the selected variant.</div>
+                        </div>
+                      `
+                      : ""
+                  }
+                </div>
+              </section>
+            `;
+          })
+          .join("");
+      }
+
+      function createDefaultVariant(block) {
+        return {
+          id: block.id,
+          name: block.name.trim(),
+          enabled: true,
+          expanded: false,
+          status: ["Active 0/2", "2 combinations"],
+          statusStyles: ["purple", "gray"],
+          logic: "No targeting",
+          scheduleId: "",
+          publishing: [{ label: "Off 2", style: "gray" }],
+          creativeName: "{{variant_name}}_{{platform}}_{{format}}",
+          templates: { creativeName: "{{variant_name}}_{{platform}}_{{format}}", headline: "{{headline}}", cta: "{{cta}}", image: "{{image}}", video: "{{video}}" },
+          targeting: { rule: "No targeting", filters: [] },
+          platforms: ["Google"],
+          adTypes: ["Display ad"],
+          quality: [{ label: "Not scored 2", style: "gray" }],
+          content: { headline: "Add headline", cta: "Add CTA", image: null, video: null },
+          formats: [
+            { name: "728x90", source: "Default structure (1)", publishing: "Off", combinations: "1 combination" },
+            { name: "300x600", source: "Default structure (1)", publishing: "Off", combinations: "1 combination" },
+          ],
+        };
+      }
+
+      function createDuplicateVariant(block) {
+        const source = state.variants.find((variant) => variant.id === block.sourceId);
+        const clone = JSON.parse(JSON.stringify(source));
+        clone.id = block.id;
+        clone.name = block.name.trim();
+        clone.expanded = false;
+        clone.publishing = [{ label: "Off 2", style: "gray" }];
+        return clone;
+      }
+
+      function validateAndCreateVariants() {
+        state.submitted = true;
+        const invalid = state.modalBlocks.some((block) => !block.name.trim() || (block.method === "duplicate" && !block.sourceId));
+        if (invalid) {
+          renderVariantModal();
+          return;
+        }
+        const created = state.modalBlocks.map((block) => (block.method === "duplicate" ? createDuplicateVariant(block) : createDefaultVariant(block)));
+        state.variants = [...state.variants, ...created];
+        state.totalCreatives += created.length * 2;
+        closeVariantModal();
+        render();
+        showToast(created.length > 1 ? "Variants created successfully." : "Variant created successfully.");
+      }
+
+      function renderLogic() {
+        syncTierUsage();
+        logicTiers.innerHTML = state.logicTiers.map(renderTier).join("");
+      }
+
+      function tierSummary(tier) {
+        if (tier.type === "Audience Targeting") {
+          const values = tier.mappings.reduce((count, mapping) => count + mapping.values.length, 0);
+          return `${tier.mappings.length} segment${tier.mappings.length === 1 ? "" : "s"} • ${values} ID value${values === 1 ? "" : "s"}`;
+        }
+        if (tier.type === "Schedule Targeting") {
+          return scheduleSummary(tier);
+        }
+        return `${(tier.values || []).length || 1} value${((tier.values || []).length || 1) === 1 ? "" : "s"}`;
+      }
+
+      function renderTier(tier) {
+        const typeOptions = ruleTypes.map((type) => `<option ${tier.type === type ? "selected" : ""}>${type}</option>`).join("");
+        return `
+          <article class="logic-tier" data-tier="${tier.id}">
+            <div class="tier-head">
+              <div class="tier-title">
+                <span class="tier-number">${tier.number}</span>
+                <strong>${escapeHtml(tier.type)}</strong>
+                ${tier.type === "Schedule Targeting" ? `<span class="asset-sub">${escapeHtml(ensureScheduleTier(tier).ruleName)} • ${escapeHtml(tier.condition || "Dayparting")}</span>` : ""}
+                ${chip(tier.type, "gray")}
+                ${chip(`Used by ${tier.usedBy || 0} variant${tier.usedBy === 1 ? "" : "s"}`, "gray")}
+                ${chip(tierSummary(tier), tierSummary(tier).startsWith("0") ? "gray" : "green")}
+              </div>
+              <div class="tier-actions">
+                <span>Active</span>
+                <button class="toggle ${tier.active ? "on" : ""}" type="button" data-tier-toggle="${tier.id}" aria-label="Toggle ${escapeHtml(tier.type)}"></button>
+                <button class="icon-button" type="button" title="Edit" aria-label="Edit tier">✎</button>
+                <button class="icon-button" type="button" title="Duplicate" aria-label="Duplicate tier">⧉</button>
+                <button class="icon-button" type="button" title="Delete" aria-label="Delete tier" data-tier-delete="${tier.id}">⋯</button>
+              </div>
+            </div>
+            <div class="form-panel" style="border: 0; border-bottom: 1px solid var(--line); border-radius: 0">
+              <div class="field" style="margin-bottom: 0">
+                <label for="type-${tier.id}">Rule type</label>
+                <select id="type-${tier.id}" data-rule-type="${tier.id}">${typeOptions}</select>
+              </div>
+            </div>
+            ${tier.type === "Audience Targeting" ? renderAudienceTier(tier) : tier.type === "Schedule Targeting" ? renderScheduleTier(tier) : renderGenericTier(tier)}
+          </article>
+        `;
+      }
+
+      function renderAudienceTier(tier) {
+        return `
+          <div class="tier-body">
+            <section class="logic-section">
+              <div class="section-label">Audience source</div>
+              <div class="helper" style="margin-bottom: 12px">Define audience segments and map them to platform or ad server identifiers.</div>
+              <div class="action-row">
+                <button class="secondary-button" type="button" data-add-audience="${tier.id}">+ Add audience</button>
+                <button class="secondary-button" type="button" data-placeholder="Import available audiences from a connected platform.">Import from Platform</button>
+                <button class="secondary-button" type="button" data-placeholder="Use shared audience definitions from this workspace.">Link to workspace</button>
+              </div>
+              <div class="helper">Source: ${escapeHtml(tier.sourceStatus || "Manual")}</div>
+            </section>
+            <section class="logic-section">
+              <div class="section-label">Segment details</div>
+              <div class="field">
+                <label for="segment-${tier.id}">Segment name</label>
+                <input id="segment-${tier.id}" type="text" data-tier-field="${tier.id}" data-field="segmentName" value="${escapeHtml(tier.segmentName || "")}" />
+              </div>
+              <div class="field">
+                <label for="entry-${tier.id}">Entry method</label>
+                <select id="entry-${tier.id}" data-tier-field="${tier.id}" data-field="entryMethod">
+                  <option ${tier.entryMethod === "Manual entry" ? "selected" : ""}>Manual entry</option>
+                  <option ${tier.entryMethod === "Import" ? "selected" : ""}>Import</option>
+                </select>
+              </div>
+              ${
+                tier.entryMethod === "Import"
+                  ? '<div class="readonly-box">Choose a connected source to import segment values.</div>'
+                  : `<button class="secondary-button" type="button" data-open-mapping="${tier.id}">Add ID mapping</button>`
+              }
+              <div class="mapping-list">
+                ${
+                  tier.mappings.length
+                    ? tier.mappings
+                        .map(
+                          (mapping) => `
+                            <div class="mapping-row">
+                              <strong>${escapeHtml(mapping.displayName)}</strong>
+                              <div class="asset-sub">${escapeHtml(mapping.idType)} • ${escapeHtml(mapping.values.join(", "))}</div>
+                            </div>
+                          `
+                        )
+                        .join("")
+                    : '<div class="readonly-box">No mappings yet.</div>'
+                }
+              </div>
+            </section>
+          </div>
+        `;
+      }
+
+      function renderScheduleTier(tier) {
+        ensureScheduleTier(tier);
+        const errors = tier.scheduleSubmitted ? scheduleErrors(tier) : { fields: {}, days: {} };
+        return `
+          <div class="tier-body single">
+            <section class="logic-section">
+              <div class="schedule-grid">
+                <div>
+                  <div class="section-label">Rule details</div>
+                  <div class="field">
+                    <label for="schedule-name-${tier.id}">Rule name</label>
+                    <input id="schedule-name-${tier.id}" data-schedule-field="${tier.id}" data-field="ruleName" value="${escapeHtml(tier.ruleName)}" placeholder="e.g. Weekend morning schedule" />
+                  </div>
+                  <div class="field">
+                    <label for="schedule-condition-${tier.id}">Condition</label>
+                    <select id="schedule-condition-${tier.id}" data-schedule-field="${tier.id}" data-field="condition">
+                      <option ${tier.condition === "Dayparting" ? "selected" : ""}>Dayparting</option>
+                    </select>
+                    <div class="helper">Run this logic only during selected dates, days, and times.</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="section-label">Timezone and date range</div>
+                  <div class="field">
+                    <label for="timezone-${tier.id}">Timezone</label>
+                    <select id="timezone-${tier.id}" data-schedule-field="${tier.id}" data-field="timezone">
+                      ${timezones.map((zone) => `<option ${tier.timezone === zone ? "selected" : ""}>${escapeHtml(zone)}</option>`).join("")}
+                    </select>
+                    <div class="helper">Schedule times are evaluated using this timezone.</div>
+                  </div>
+                  <div class="schedule-grid">
+                    <div class="field">
+                      <label for="start-${tier.id}">Start date</label>
+                      <input id="start-${tier.id}" class="${errors.fields.startDate ? "invalid" : ""}" type="date" data-schedule-field="${tier.id}" data-field="startDate" value="${escapeHtml(tier.startDate)}" />
+                      <div class="error">${errors.fields.startDate || ""}</div>
+                    </div>
+                    <div class="field">
+                      <label for="end-${tier.id}">End date</label>
+                      <input id="end-${tier.id}" class="${errors.fields.endDate ? "invalid" : ""}" type="date" data-schedule-field="${tier.id}" data-field="endDate" value="${escapeHtml(tier.endDate)}" />
+                      <div class="error">${errors.fields.endDate || ""}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section class="logic-section">
+              <div class="section-label">Schedule filters</div>
+              <div class="helper" style="margin-bottom: 10px">Use presets for common schedules, or customize specific days and times below.</div>
+              <div class="preset-row">
+                ${Object.keys(schedulePresets)
+                  .map(
+                    (preset) => `
+                      <button class="preset-chip ${tier.presets.includes(preset) ? "selected" : ""}" type="button" data-schedule-preset="${tier.id}" data-preset="${preset}" aria-pressed="${tier.presets.includes(preset)}">${preset}</button>
+                    `
+                  )
+                  .join("")}
+              </div>
+            </section>
+            <section class="logic-section">
+              <div class="section-label">Custom schedule</div>
+              <div class="day-list">${weekDays.map((day) => renderDayRow(tier, day, errors)).join("")}</div>
+            </section>
+            <section class="logic-section">
+              <div class="section-label">Schedule summary</div>
+              <div class="schedule-summary">
+                <strong>${escapeHtml(scheduleSummary(tier))}</strong>
+                <div class="asset-sub">${escapeHtml(scheduleDateSummary(tier))}</div>
+                <div class="asset-sub">${tier.customized ? "Customized from presets" : "Preset-based schedule"}</div>
+              </div>
+            </section>
+          </div>
+          <div class="schedule-footer">
+            <button class="ghost-button" type="button" data-schedule-cancel="${tier.id}">Cancel</button>
+            <button class="primary-button" type="button" data-save-schedule="${tier.id}">Save changes</button>
+          </div>
+        `;
+      }
+
+      function renderDayRow(tier, day, errors) {
+        const config = tier.days[day];
+        const ranges = config.ranges || [];
+        return `
+          <div class="day-row">
+            <div class="day-main">
+              <input type="checkbox" data-schedule-day-enabled="${tier.id}" data-day="${day}" ${config.enabled ? "checked" : ""} aria-label="Enable ${day}" />
+              <strong>${day}</strong>
+              <span class="asset-sub">Start time</span>
+              <span class="asset-sub">End time</span>
+              <button class="text-button" type="button" data-add-time-range="${tier.id}" data-day="${day}">+ Add time range</button>
+            </div>
+            ${ranges
+              .map((range, index) => {
+                const error = errors.days?.[`${day}-${index}`] || "";
+                return `
+                  <div class="time-range">
+                    <span class="asset-sub">${index === 0 ? "Primary range" : `Range ${index + 1}`}</span>
+                    <input class="${error ? "invalid" : ""}" type="time" data-time-field="${tier.id}" data-day="${day}" data-index="${index}" data-field="start" value="${escapeHtml(range.start)}" ${config.enabled ? "" : "disabled"} aria-label="${day} start time" />
+                    <input class="${error ? "invalid" : ""}" type="time" data-time-field="${tier.id}" data-day="${day}" data-index="${index}" data-field="end" value="${escapeHtml(range.end)}" ${config.enabled ? "" : "disabled"} aria-label="${day} end time" />
+                    ${index > 0 ? `<button class="text-button" type="button" data-remove-time-range="${tier.id}" data-day="${day}" data-index="${index}">Remove</button>` : "<span></span>"}
+                    <div class="error" style="grid-column: 2 / -1">${error}</div>
+                  </div>
+                `;
+              })
+              .join("")}
+          </div>
+        `;
+      }
+
+      function renderGenericTier(tier) {
+        const labels = {
+          "Schedule Targeting": ["IF", "Dayparting", "Weekdays", "Weekend", "Evening"],
+          "Geo Targeting": ["IF", "Geo targeting", "London", "Manchester", "Birmingham"],
+          "Weather Targeting": ["IF", "Weather targeting", "Rainy", "Sunny", "Cold"],
+          "Product Match": ["IF", "Product match", "Featured products", "Retargeted products", "SKU family"],
+        };
+        const data = labels[tier.type] || labels["Schedule Targeting"];
+        const values = tier.values?.length ? tier.values : data.slice(2, 5);
+        return `
+          <div class="tier-body">
+            <section class="logic-section">
+              <div class="section-label">${escapeHtml(data[0])}</div>
+              <div class="field">
+                <select class="inline-select"><option>${escapeHtml(data[1])}</option></select>
+              </div>
+              <div class="field">
+                <input class="inline-input" value="${escapeHtml(values[0] || "")}" />
+              </div>
+              <button class="secondary-button" type="button">+ Add condition</button>
+            </section>
+            <section class="logic-section">
+              <div class="section-label">Filter values</div>
+              <div class="chip-row">${values.map((value) => chip(value, "gray")).join("")}</div>
+              <div class="field" style="margin-top: 12px">
+                <label for="values-${tier.id}">Available values</label>
+                <input id="values-${tier.id}" data-tier-values="${tier.id}" value="${escapeHtml(values.join(", "))}" placeholder="Add value" />
+              </div>
+              <div class="section-label">Assigned variants</div>
+              <div class="readonly-box">${(tier.assigned || []).length ? escapeHtml(tier.assigned.join(", ")) : "Assign this rule from Table mode."}</div>
+            </section>
+          </div>
+        `;
+      }
+
+      function applySchedulePresets(tier) {
+        ensureScheduleTier(tier);
+        const selectedDayPresets = tier.presets.filter((preset) => schedulePresets[preset]?.days);
+        const selectedTimePresets = tier.presets.filter((preset) => schedulePresets[preset]?.range);
+        const enabledDays = selectedDayPresets.length
+          ? uniqueValues(selectedDayPresets.flatMap((preset) => schedulePresets[preset].days))
+          : enabledScheduleDays(tier);
+        const ranges = selectedTimePresets.length
+          ? selectedTimePresets.map((preset) => ({ ...schedulePresets[preset].range }))
+          : [{ start: "09:00", end: "17:00" }];
+        weekDays.forEach((day) => {
+          tier.days[day].enabled = enabledDays.includes(day);
+          if (tier.days[day].enabled) tier.days[day].ranges = ranges.map((range) => ({ ...range }));
+        });
+        tier.values = [...tier.presets];
+      }
+
+      function updateScheduleField(tierId, field, value) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        tier[field] = value;
+        if (field === "ruleName") renderTable();
+      }
+
+      function toggleSchedulePreset(tierId, preset) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        const selected = new Set(tier.presets);
+        if (selected.has(preset)) selected.delete(preset);
+        else selected.add(preset);
+        tier.presets = Array.from(selected);
+        tier.customized = false;
+        applySchedulePresets(tier);
+        render();
+      }
+
+      function updateDayEnabled(tierId, day, checked) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        tier.days[day].enabled = checked;
+        tier.days[day].touched = true;
+        tier.customized = true;
+        render();
+      }
+
+      function updateTimeRange(tierId, day, index, field, value) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        tier.days[day].ranges[index][field] = value;
+        tier.days[day].touched = true;
+        tier.customized = true;
+      }
+
+      function addTimeRange(tierId, day) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        tier.days[day].enabled = true;
+        tier.days[day].ranges.push({ start: "09:00", end: "17:00" });
+        tier.days[day].touched = true;
+        tier.customized = true;
+        render();
+      }
+
+      function removeTimeRange(tierId, day, index) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        tier.days[day].ranges.splice(Number(index), 1);
+        if (!tier.days[day].ranges.length) tier.days[day].ranges.push({ start: "09:00", end: "17:00" });
+        tier.customized = true;
+        render();
+      }
+
+      function saveSchedule(tierId) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        ensureScheduleTier(tier);
+        tier.scheduleSubmitted = true;
+        if (hasScheduleErrors(tier)) {
+          renderLogic();
+          return;
+        }
+        tier.values = tier.presets.length ? [...tier.presets] : uniqueValues(enabledScheduleDays(tier));
+        render();
+        showToast("Schedule targeting rule updated.");
+      }
+
+      function assignScheduleToVariant(variantId, scheduleId) {
+        const variant = state.variants.find((item) => item.id === variantId);
+        if (!variant) return;
+        variant.scheduleId = scheduleId;
+        if (scheduleId && variant.targeting.rule === "No targeting") {
+          variant.targeting.rule = "Daypart targeting";
+          variant.logic = "Daypart targeting";
+        }
+        render();
+        showToast(scheduleId ? "Schedule assigned." : "Schedule cleared.");
+      }
+
+      function createScheduleFromTable() {
+        const number = state.logicTiers.length ? Math.max(...state.logicTiers.map((tier) => tier.number)) + 1 : 1;
+        const schedule = createDefaultScheduleConfig();
+        state.logicTiers.push({ id: `tier-${Date.now()}`, number, type: "Schedule Targeting", active: true, usedBy: 0, assigned: [], ...schedule });
+        state.activeTab = "logic";
+        render();
+        showToast("Schedule targeting rule created.");
+      }
+
+      function requestDeleteTier(tierId) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        if (tier.type === "Schedule Targeting") {
+          const used = state.variants.filter((variant) => variant.scheduleId === tier.id);
+          if (used.length) {
+            state.pendingDelete = tier.id;
+            confirmDeleteMessage.textContent = `This schedule is used by ${used.length} variant${used.length === 1 ? "" : "s"}. Deleting it will remove the schedule from those rows.`;
+            confirmDeleteModal.hidden = false;
+            return;
+          }
+        }
+        deleteTier(tierId);
+      }
+
+      function deleteTier(tierId) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier) return;
+        if (tier.type === "Schedule Targeting") {
+          state.variants.forEach((variant) => {
+            if (variant.scheduleId === tier.id) variant.scheduleId = "";
+          });
+        }
+        state.logicTiers = state.logicTiers.filter((item) => item.id !== tierId);
+        render();
+        showToast(tier.type === "Schedule Targeting" ? "Schedule deleted." : "Tier deleted.");
+      }
+
+      function openTierModal() {
+        state.tierDraftType = "Audience Targeting";
+        tierModal.hidden = false;
+        renderRuleOptions();
+        tierModal.querySelector("input").focus();
+      }
+
+      function closeTierModal() {
+        tierModal.hidden = true;
+      }
+
+      function renderRuleOptions() {
+        document.getElementById("ruleOptions").innerHTML = ruleTypes
+          .map(
+            (type) => `
+              <label class="rule-option ${state.tierDraftType === type ? "selected" : ""}">
+                <input type="radio" name="tierType" value="${escapeHtml(type)}" ${state.tierDraftType === type ? "checked" : ""} />
+                <span><strong>${escapeHtml(type)}</strong><span class="asset-sub">Create a ${escapeHtml(type.toLowerCase())} tier.</span></span>
+              </label>
+            `
+          )
+          .join("");
+      }
+
+      function createTier() {
+        const number = state.logicTiers.length ? Math.max(...state.logicTiers.map((tier) => tier.number)) + 1 : 1;
+        const id = `tier-${Date.now()}`;
+        const tier =
+          state.tierDraftType === "Audience Targeting"
+            ? { id, number, type: state.tierDraftType, active: true, usedBy: 0, segmentName: "New audience segment", entryMethod: "Manual entry", sourceStatus: "Manual entry", mappings: [] }
+            : state.tierDraftType === "Schedule Targeting"
+              ? { id, number, type: state.tierDraftType, active: true, usedBy: 0, assigned: [], ...createDefaultScheduleConfig() }
+              : { id, number, type: state.tierDraftType, active: true, usedBy: 0, values: [], assigned: [] };
+        state.logicTiers.push(tier);
+        closeTierModal();
+        state.activeTab = "logic";
+        render();
+        showToast(state.tierDraftType === "Schedule Targeting" ? "Schedule targeting rule created." : "Logic tier created.");
+      }
+
+      function hasTierConfig(tier) {
+        if (tier.type === "Audience Targeting") return tier.mappings.length || tier.segmentName;
+        if (tier.type === "Schedule Targeting") return tier.ruleName || tier.startDate || tier.endDate || scheduleRangeCount(tier);
+        return (tier.values || []).length;
+      }
+
+      function changeTierType(tierId, nextType) {
+        const tier = state.logicTiers.find((item) => item.id === tierId);
+        if (!tier || tier.type === nextType) return;
+        if (hasTierConfig(tier)) {
+          state.pendingTypeChange = { tierId, nextType };
+          confirmTypeModal.hidden = false;
+          return;
+        }
+        applyTierTypeChange(tier, nextType);
+        render();
+      }
+
+      function applyTierTypeChange(tier, nextType) {
+        const wasSchedule = tier.type === "Schedule Targeting";
+        if (wasSchedule && nextType !== "Schedule Targeting") {
+          state.variants.forEach((variant) => {
+            if (variant.scheduleId === tier.id) variant.scheduleId = "";
+          });
+        }
+        tier.type = nextType;
+        if (nextType === "Audience Targeting") {
+          tier.segmentName = "New audience segment";
+          tier.entryMethod = "Manual entry";
+          tier.sourceStatus = "Manual entry";
+          tier.mappings = [];
+          delete tier.values;
+          delete tier.assigned;
+          delete tier.ruleName;
+          delete tier.condition;
+          delete tier.timezone;
+          delete tier.startDate;
+          delete tier.endDate;
+          delete tier.presets;
+          delete tier.days;
+        } else if (nextType === "Schedule Targeting") {
+          Object.assign(tier, createDefaultScheduleConfig());
+          tier.assigned = [];
+          delete tier.segmentName;
+          delete tier.entryMethod;
+          delete tier.sourceStatus;
+          delete tier.mappings;
+        } else {
+          tier.values = [];
+          tier.assigned = [];
+          delete tier.segmentName;
+          delete tier.entryMethod;
+          delete tier.sourceStatus;
+          delete tier.mappings;
+          delete tier.ruleName;
+          delete tier.condition;
+          delete tier.timezone;
+          delete tier.startDate;
+          delete tier.endDate;
+          delete tier.presets;
+          delete tier.days;
+        }
+      }
+
+      function openMappingModal(tierId) {
+        state.mappingDraft = { tierId, idType: "", values: "", displayName: "", submitted: false };
+        mappingModal.hidden = false;
+        renderMappingForm();
+        mappingModal.querySelector("select").focus();
+      }
+
+      function closeMappingModal() {
+        mappingModal.hidden = true;
+      }
+
+      function renderMappingForm() {
+        const draft = state.mappingDraft;
+        const idTypeError = draft.submitted && !draft.idType;
+        const valuesError = draft.submitted && !draft.values.trim();
+        const nameError = draft.submitted && !draft.displayName.trim();
+        mappingForm.innerHTML = `
+          <div class="field">
+            <label for="mappingIdType">ID type</label>
+            <select id="mappingIdType" class="${idTypeError ? "invalid" : ""}" data-mapping-field="idType">
+              <option value="">Select ID type</option>
+              ${idTypes.map((type) => `<option value="${escapeHtml(type)}" ${draft.idType === type ? "selected" : ""}>${escapeHtml(type)}</option>`).join("")}
+            </select>
+            <div class="error">${idTypeError ? "ID type is required." : ""}</div>
+          </div>
+          <div class="field">
+            <label for="mappingValues">ID values</label>
+            <textarea id="mappingValues" class="${valuesError ? "invalid" : ""}" data-mapping-field="values" placeholder="Enter one or more IDs">${escapeHtml(draft.values)}</textarea>
+            <div class="error">${valuesError ? "At least one ID value is required." : ""}</div>
+          </div>
+          <div class="field">
+            <label for="mappingDisplay">Display name</label>
+            <input id="mappingDisplay" class="${nameError ? "invalid" : ""}" data-mapping-field="displayName" value="${escapeHtml(draft.displayName)}" placeholder="e.g. High-value shoppers" />
+            <div class="error">${nameError ? "Display name is required." : ""}</div>
+          </div>
+        `;
+      }
+
+      function addMapping() {
+        state.mappingDraft.submitted = true;
+        const draft = state.mappingDraft;
+        if (!draft.idType || !draft.values.trim() || !draft.displayName.trim()) {
+          renderMappingForm();
+          return;
+        }
+        const tier = state.logicTiers.find((item) => item.id === draft.tierId);
+        if (!tier) return;
+        tier.mappings.push({
+          idType: draft.idType,
+          values: draft.values.split(/[\n,]+/).map((value) => value.trim()).filter(Boolean),
+          displayName: draft.displayName.trim(),
+        });
+        tier.segmentName = tier.segmentName || draft.displayName.trim();
+        tier.usedBy = Math.max(tier.usedBy || 0, 3);
+        syncAudienceToTable(tier);
+        closeMappingModal();
+        render();
+        showToast("Mapping added.");
+      }
+
+      function syncAudienceToTable(tier) {
+        const names = tier.mappings.map((mapping) => mapping.displayName);
+        if (!names.length) return;
+        state.variants.forEach((variant) => {
+          if (variant.logic === "Audience targeting" || variant.id === "product-detail") {
+            variant.logic = "Audience targeting";
+            variant.targeting.rule = "Audience targeting";
+            if (!variant.targeting.filters.length) variant.targeting.filters = [names[0]];
+          }
+        });
+      }
+
+      function render() {
+        renderTabs();
+        renderMeta();
+        renderTable();
+        renderLogic();
+      }
+
+      document.getElementById("tabs").addEventListener("click", (event) => {
+        const tab = event.target.closest("[data-tab]");
+        if (!tab) return;
+        state.activeTab = tab.dataset.tab;
+        renderTabs();
+      });
+
+      addVariantButton.addEventListener("click", () => {
+        state.addMenuOpen = !state.addMenuOpen;
+        addVariantMenu.hidden = !state.addMenuOpen;
+        addVariantButton.setAttribute("aria-expanded", String(state.addMenuOpen));
+      });
+
+      addVariantMenu.addEventListener("click", (event) => {
+        const action = event.target.dataset.action;
+        if (!action) return;
+        state.addMenuOpen = false;
+        addVariantMenu.hidden = true;
+        addVariantButton.setAttribute("aria-expanded", "false");
+        if (action === "add-manually") openVariantModal();
+        else showToast("Generate with AI is ready for the next prototype phase.");
+      });
+
+      columnButton.addEventListener("click", () => {
+        state.columnMenuOpen = !state.columnMenuOpen;
+        columnMenu.hidden = !state.columnMenuOpen;
+        columnButton.setAttribute("aria-expanded", String(state.columnMenuOpen));
+      });
+
+      columnMenu.addEventListener("change", (event) => {
+        const columnId = event.target.dataset.columnToggle;
+        if (!columnId) return;
+        if (event.target.checked) state.hiddenContentColumns.delete(columnId);
+        else state.hiddenContentColumns.add(columnId);
+        renderTable();
+      });
+
+      document.addEventListener("click", (event) => {
+        const target = event.target;
+        if (!target.closest(".top-actions") && state.addMenuOpen) {
+          state.addMenuOpen = false;
+          addVariantMenu.hidden = true;
+          addVariantButton.setAttribute("aria-expanded", "false");
+        }
+        if (!target.closest(".toolbar-actions") && state.columnMenuOpen) {
+          state.columnMenuOpen = false;
+          columnMenu.hidden = true;
+          columnButton.setAttribute("aria-expanded", "false");
+        }
+
+        const filterButton = target.closest("[data-filter]");
+        if (filterButton) {
+          state.activeLogic = filterButton.dataset.filter;
+          renderTable();
+          return;
+        }
+
+        const expandButton = target.closest("[data-expand]");
+        if (expandButton) {
+          const variant = state.variants.find((item) => item.id === expandButton.dataset.expand);
+          if (variant) variant.expanded = !variant.expanded;
+          renderTable();
+          return;
+        }
+
+        const toggleButton = target.closest("[data-toggle]");
+        if (toggleButton) {
+          const variant = state.variants.find((item) => item.id === toggleButton.dataset.toggle);
+          if (variant) variant.enabled = !variant.enabled;
+          renderRows();
+          return;
+        }
+
+        const ruleButton = target.closest("[data-rule-button]");
+        if (ruleButton) {
+          openRulePopover(ruleButton);
+          return;
+        }
+
+        const rowFilterButton = target.closest("[data-filter-button]");
+        if (rowFilterButton) {
+          openFilterPopover(rowFilterButton);
+          return;
+        }
+
+        const createScheduleButton = target.closest("[data-create-schedule-from-table]");
+        if (createScheduleButton) {
+          createScheduleFromTable();
+          return;
+        }
+
+        const ruleOption = target.closest("[data-rule-option]");
+        if (ruleOption) {
+          selectRuleForVariant(ruleOption.dataset.ruleOption);
+          return;
+        }
+
+        const filterValue = target.closest("[data-filter-value]");
+        if (filterValue) {
+          toggleFilterValue(filterValue.dataset.filterValue);
+          return;
+        }
+
+        if (target.matches("[data-clear-filter]")) {
+          clearFilterValues();
+          return;
+        }
+
+        if (target.matches("[data-open-logic]")) {
+          openLogicFromTargeting();
+          return;
+        }
+
+        if (target.matches("[data-targeting-cancel]")) {
+          closeTargetingPopover(true);
+          return;
+        }
+
+        const editButton = target.closest("[data-edit-field]");
+        if (editButton) {
+          openEditPopover(editButton);
+          return;
+        }
+
+        const connectorButton = target.closest("[data-connector]");
+        if (connectorButton) {
+          openConnectorPopover(connectorButton);
+          return;
+        }
+
+        if (target.matches("[data-connector-disconnect]")) {
+          disconnectPair();
+          return;
+        }
+
+        if (target.matches("[data-connector-cancel]")) {
+          closeConnectorPopover(true);
+          return;
+        }
+
+        if (target.matches("[data-edit-cancel]")) {
+          closeEditPopover(true);
+          return;
+        }
+
+        if (target.matches("[data-edit-save]")) {
+          saveEdit();
+          return;
+        }
+
+        const assetButton = target.closest("[data-asset]");
+        if (assetButton) {
+          updateEditingValue(assetButton);
+          return;
+        }
+
+        const placeholder = target.closest("[data-placeholder]");
+        if (placeholder) {
+          showToast(placeholder.dataset.placeholder);
+          return;
+        }
+
+        const addAudience = target.closest("[data-add-audience]");
+        if (addAudience) {
+          const tier = state.logicTiers.find((item) => item.id === addAudience.dataset.addAudience);
+          if (tier) {
+            tier.segmentName = "New audience segment";
+            tier.entryMethod = "Manual entry";
+            renderLogic();
+            showToast("Audience segment added.");
+          }
+          return;
+        }
+
+        const openMapping = target.closest("[data-open-mapping]");
+        if (openMapping) {
+          openMappingModal(openMapping.dataset.openMapping);
+          return;
+        }
+
+        const tierToggle = target.closest("[data-tier-toggle]");
+        if (tierToggle) {
+          const tier = state.logicTiers.find((item) => item.id === tierToggle.dataset.tierToggle);
+          if (tier) tier.active = !tier.active;
+          renderLogic();
+          return;
+        }
+
+        const deleteTier = target.closest("[data-tier-delete]");
+        if (deleteTier) {
+          requestDeleteTier(deleteTier.dataset.tierDelete);
+          return;
+        }
+
+        const schedulePreset = target.closest("[data-schedule-preset]");
+        if (schedulePreset) {
+          toggleSchedulePreset(schedulePreset.dataset.schedulePreset, schedulePreset.dataset.preset);
+          return;
+        }
+
+        const addRange = target.closest("[data-add-time-range]");
+        if (addRange) {
+          addTimeRange(addRange.dataset.addTimeRange, addRange.dataset.day);
+          return;
+        }
+
+        const removeRange = target.closest("[data-remove-time-range]");
+        if (removeRange) {
+          removeTimeRange(removeRange.dataset.removeTimeRange, removeRange.dataset.day, removeRange.dataset.index);
+          return;
+        }
+
+        const saveScheduleButton = target.closest("[data-save-schedule]");
+        if (saveScheduleButton) {
+          saveSchedule(saveScheduleButton.dataset.saveSchedule);
+          return;
+        }
+
+        const cancelScheduleButton = target.closest("[data-schedule-cancel]");
+        if (cancelScheduleButton) {
+          renderLogic();
+          return;
+        }
+
+        if (!target.closest("#editPopover") && !target.closest("[data-edit-field]")) closeEditPopover();
+        if (!target.closest("#connectorPopover") && !target.closest("[data-connector]")) closeConnectorPopover();
+        if (!target.closest("#targetingPopover") && !target.closest("[data-rule-button]") && !target.closest("[data-filter-button]")) closeTargetingPopover();
+      });
+
+      editPopover.addEventListener("input", (event) => updateEditingValue(event.target));
+      editPopover.addEventListener("change", (event) => updateEditingValue(event.target));
+      targetingPopover.addEventListener("input", (event) => {
+        if (!state.targeting || !event.target.matches("[data-filter-search]")) return;
+        state.targeting.search = event.target.value;
+        renderTargetingPopover();
+        const input = targetingPopover.querySelector("[data-filter-search]");
+        if (input) {
+          input.focus();
+          input.setSelectionRange(input.value.length, input.value.length);
+        }
+      });
+
+      searchInput.addEventListener("input", (event) => {
+        state.search = event.target.value;
+        renderRows();
+      });
+
+      tableBody.addEventListener("change", (event) => {
+        const variantId = event.target.dataset.scheduleSelect;
+        if (!variantId) return;
+        assignScheduleToVariant(variantId, event.target.value);
+      });
+
+      document.getElementById("closeModalButton").addEventListener("click", closeVariantModal);
+      document.getElementById("cancelModalButton").addEventListener("click", closeVariantModal);
+      document.getElementById("addAnotherButton").addEventListener("click", () => {
+        state.modalBlocks.push(newBlock());
+        renderVariantModal();
+      });
+      document.getElementById("createVariantsButton").addEventListener("click", validateAndCreateVariants);
+      variantBlocks.addEventListener("input", (event) => {
+        const block = state.modalBlocks.find((item) => item.id === event.target.dataset.block);
+        if (!block) return;
+        block[event.target.dataset.field] = event.target.value;
+      });
+      variantBlocks.addEventListener("change", (event) => {
+        const block = state.modalBlocks.find((item) => item.id === event.target.dataset.block);
+        if (!block) return;
+        block[event.target.dataset.field] = event.target.value;
+        if (event.target.dataset.field === "method") renderVariantModal();
+      });
+      variantModal.addEventListener("click", (event) => {
+        if (event.target === variantModal) closeVariantModal();
+      });
+
+      document.getElementById("addTierButton").addEventListener("click", openTierModal);
+      document.getElementById("closeTierModalButton").addEventListener("click", closeTierModal);
+      document.getElementById("cancelTierButton").addEventListener("click", closeTierModal);
+      document.getElementById("createTierButton").addEventListener("click", createTier);
+      document.getElementById("ruleOptions").addEventListener("change", (event) => {
+        state.tierDraftType = event.target.value;
+        renderRuleOptions();
+      });
+      tierModal.addEventListener("click", (event) => {
+        if (event.target === tierModal) closeTierModal();
+      });
+
+      logicTiers.addEventListener("input", (event) => {
+        const scheduleField = event.target.dataset.scheduleField;
+        if (scheduleField) {
+          updateScheduleField(scheduleField, event.target.dataset.field, event.target.value);
+          return;
+        }
+        const timeField = event.target.dataset.timeField;
+        if (timeField) {
+          updateTimeRange(timeField, event.target.dataset.day, Number(event.target.dataset.index), event.target.dataset.field, event.target.value);
+          return;
+        }
+        const valuesTierId = event.target.dataset.tierValues;
+        if (valuesTierId) {
+          const tier = state.logicTiers.find((item) => item.id === valuesTierId);
+          if (tier) tier.values = event.target.value.split(",").map((value) => value.trim()).filter(Boolean);
+          return;
+        }
+        const tier = state.logicTiers.find((item) => item.id === event.target.dataset.tierField);
+        if (!tier) return;
+        tier[event.target.dataset.field] = event.target.value;
+      });
+      logicTiers.addEventListener("change", (event) => {
+        const ruleType = event.target.dataset.ruleType;
+        if (ruleType) {
+          changeTierType(ruleType, event.target.value);
+          return;
+        }
+        const scheduleField = event.target.dataset.scheduleField;
+        if (scheduleField) {
+          updateScheduleField(scheduleField, event.target.dataset.field, event.target.value);
+          render();
+          return;
+        }
+        const dayEnabled = event.target.dataset.scheduleDayEnabled;
+        if (dayEnabled) {
+          updateDayEnabled(dayEnabled, event.target.dataset.day, event.target.checked);
+          return;
+        }
+        const timeField = event.target.dataset.timeField;
+        if (timeField) {
+          updateTimeRange(timeField, event.target.dataset.day, Number(event.target.dataset.index), event.target.dataset.field, event.target.value);
+          renderLogic();
+          return;
+        }
+        const valuesTierId = event.target.dataset.tierValues;
+        if (valuesTierId) {
+          const tier = state.logicTiers.find((item) => item.id === valuesTierId);
+          if (tier) tier.values = event.target.value.split(",").map((value) => value.trim()).filter(Boolean);
+          render();
+          return;
+        }
+        const tier = state.logicTiers.find((item) => item.id === event.target.dataset.tierField);
+        if (!tier) return;
+        tier[event.target.dataset.field] = event.target.value;
+        render();
+      });
+
+      document.getElementById("cancelTypeChangeButton").addEventListener("click", () => {
+        state.pendingTypeChange = null;
+        confirmTypeModal.hidden = true;
+        renderLogic();
+      });
+      document.getElementById("confirmTypeChangeButton").addEventListener("click", () => {
+        const pending = state.pendingTypeChange;
+        if (pending) {
+          const tier = state.logicTiers.find((item) => item.id === pending.tierId);
+          if (tier) applyTierTypeChange(tier, pending.nextType);
+        }
+        state.pendingTypeChange = null;
+        confirmTypeModal.hidden = true;
+        render();
+      });
+
+      document.getElementById("cancelDeleteButton").addEventListener("click", () => {
+        state.pendingDelete = null;
+        confirmDeleteModal.hidden = true;
+      });
+      document.getElementById("confirmDeleteButton").addEventListener("click", () => {
+        const pending = state.pendingDelete;
+        state.pendingDelete = null;
+        confirmDeleteModal.hidden = true;
+        if (pending) deleteTier(pending);
+      });
+
+      document.getElementById("closeMappingModalButton").addEventListener("click", closeMappingModal);
+      document.getElementById("cancelMappingButton").addEventListener("click", closeMappingModal);
+      document.getElementById("addMappingButton").addEventListener("click", addMapping);
+      mappingForm.addEventListener("input", (event) => {
+        const field = event.target.dataset.mappingField;
+        if (!field) return;
+        state.mappingDraft[field] = event.target.value;
+      });
+      mappingForm.addEventListener("change", (event) => {
+        const field = event.target.dataset.mappingField;
+        if (!field) return;
+        state.mappingDraft[field] = event.target.value;
+      });
+      mappingModal.addEventListener("click", (event) => {
+        if (event.target === mappingModal) closeMappingModal();
+      });
+
+      projectsPrototypeLink.addEventListener("click", (event) => {
+        if (window.location.protocol === "file:") {
+          event.preventDefault();
+          window.location.href = "projects/index.html";
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeVariantModal();
+          closeTierModal();
+          closeMappingModal();
+          closeEditPopover(true);
+          closeConnectorPopover(true);
+          closeTargetingPopover(true);
+          confirmTypeModal.hidden = true;
+          confirmDeleteModal.hidden = true;
+        }
+      });
+
+      render();
+    </script>
+  </body>
+</html>
